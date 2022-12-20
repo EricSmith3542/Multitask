@@ -14,6 +14,7 @@ public class UpDown : MonoBehaviour
     private InputAction Move;
     private Transform gameCenter;
     private float initialZ;
+    private bool gameFailed = false;
 
     public float moveSpeedMultiplier = .5f;
     public float maxHeight = 3.65f;
@@ -21,6 +22,11 @@ public class UpDown : MonoBehaviour
     public float rotateX = .1f;
     public float rotateY = .1f;
     public float rotateZ = .1f;
+
+    [Header("Camera")]
+    [SerializeField]
+    private Camera gameCamera;
+    public float sizeChangeSpeed = 2f;
 
     [Header("Spawner Controls")]
     [SerializeField]
@@ -61,6 +67,13 @@ public class UpDown : MonoBehaviour
             }
         }
         spotLight.colorTemperature = Utils.MapFloat(closestDistance, noDangerDistance, 0, lightTempDangerMin, lightTempDangerMax);
+
+        //Dont actually use this, just test code for controlling cameras
+        //Use something similar to this in the overall game controller
+        //if (gameFailed)
+        //{
+        //    gameCamera.rect = new Rect(Mathf.Lerp(gameCamera.rect.x, 0, Time.deltaTime * sizeChangeSpeed), 0, .5f, Mathf.Lerp(gameCamera.rect.height, .5f, Time.deltaTime * sizeChangeSpeed));
+        //}
     }
 
     private void OnTriggerEnter(Collider other)
@@ -68,6 +81,7 @@ public class UpDown : MonoBehaviour
         if (other.tag.Equals(OBSTACLE_TAG))
         {
             Debug.Log("UpDown FAILED");
+            gameFailed = true;
         }
     }
 

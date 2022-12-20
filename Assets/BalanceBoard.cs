@@ -7,9 +7,13 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(Rigidbody))]
 public class BalanceBoard : MonoBehaviour
 {
+    private const float failDistance = 3f;
     private PlayerInput PlayerInput;
     private Rigidbody Rigidbody;
     private InputAction Tilt;
+
+    [SerializeField]
+    private GameObject ball;
 
     [Range(0.01f, 1)]
     public float rotationSpeedMultiplier = .5f;
@@ -21,8 +25,16 @@ public class BalanceBoard : MonoBehaviour
         Rigidbody = GetComponent<Rigidbody>();
     }
 
+    private void Update()
+    {
+        if(ball.transform.position.y < transform.position.y - failDistance)
+        {
+            Debug.Log("Balance Fail");
+        }
+    }
+
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
         Rigidbody.AddTorque(new Vector3(0, 0, Tilt.ReadValue<float>() * rotationSpeedMultiplier), ForceMode.VelocityChange);
     }
