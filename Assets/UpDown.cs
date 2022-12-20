@@ -6,6 +6,7 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(PlayerInput))]
 public class UpDown : MonoBehaviour
 {
+    //Test comment
     private string OBSTACLE_TAG = "UpDownObstacle";
 
     private PlayerInput PlayerInput;
