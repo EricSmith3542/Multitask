@@ -7,17 +7,22 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(Rigidbody))]
 public class Jumper : MonoBehaviour
 {
+    private const string OBSTACLE_TAG = "JumpObstacle";
+    
     private InputAction Jump;
     private float maxJumpHeight;
     private Rigidbody rb;
 
+
     [Header("Jump Settings")]
+    [SerializeField]
+    private JumpGameController controller;
     public float maxJumpForce = 1f;
 
     void Start()
     {
         Jump = GetComponent<PlayerInput>().actions["Jump"];
-        maxJumpHeight = transform.position.y + 4;
+        maxJumpHeight = transform.position.y + 5;
         rb = GetComponent<Rigidbody>();
     }
 
@@ -38,6 +43,14 @@ public class Jumper : MonoBehaviour
         if (Jump.IsPressed())
         {
             rb.AddForce(Vector3.up * maxJumpForce, ForceMode.Impulse);
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if(other.tag == OBSTACLE_TAG)
+        {
+            controller.fail();
         }
     }
 }

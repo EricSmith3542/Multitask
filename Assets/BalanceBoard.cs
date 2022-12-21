@@ -11,6 +11,7 @@ public class BalanceBoard : MonoBehaviour
     private PlayerInput PlayerInput;
     private Rigidbody Rigidbody;
     private InputAction Tilt;
+    private bool hasntFailed = true;
 
     [SerializeField]
     private GameObject ball;
@@ -27,9 +28,10 @@ public class BalanceBoard : MonoBehaviour
 
     private void Update()
     {
-        if(ball.transform.position.y < transform.position.y - failDistance)
+        if(ball.transform.position.y < transform.position.y - failDistance && hasntFailed)
         {
             Debug.Log("Balance Fail");
+            hasntFailed = false;
         }
     }
 

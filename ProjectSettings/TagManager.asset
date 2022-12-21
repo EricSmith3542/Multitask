@@ -5,6 +5,8 @@ TagManager:
   serializedVersion: 2
   tags:
   - UpDownObstacle
+  - JumpObstacle
+  - MouseCollect
   layers:
   - Default
   - TransparentFX

@@ -8,30 +8,37 @@ public class JumpGameController : MonoBehaviour
     [SerializeField]
     private GameObject floorAndWall;
     [SerializeField]
-    private GameObject tallObject;
-    [SerializeField]
-    private GameObject shortObject;
+    private GameObject obstacle;
 
     [Header("Game Controls")]
     public float gameSpeed = 1f;
+    public float secondsPerObstacle = 1f;
+    public float bottomSpawnYPadding = .5f;
+    public float topSpawnYPadding = 3.5f;
+    public float middleSpawnYPadding = 1.5f;
 
 
-    private Vector3 gameSpeedVector;
+    private Vector3 gameSpeedVector, bottomVector, topVector, middleVector;
     private float secondsBetweenSpawns;
-    private float spawnTimer;
+    private float wallFloorSpawnTimer;
+    private float obstacleTimer;
+    private bool hasntFailed = true;
 
     // Start is called before the first frame update
     void Start()
     {
         //TODO: This is mega jank, fix later lol
         secondsBetweenSpawns = (floorAndWall.GetComponent<Transform>().GetChild(0).GetComponent<Transform>().localScale.x * 10 / gameSpeed) - .05f;
-        spawnTimer = secondsBetweenSpawns;
+        wallFloorSpawnTimer = secondsBetweenSpawns;
+        obstacleTimer = secondsPerObstacle;
+        gameSpeedVector = new Vector3(-gameSpeed, 0, 0);
+        bottomVector = Vector3.up * bottomSpawnYPadding;
+        topVector = Vector3.up * topSpawnYPadding;
+        middleVector = Vector3.up * middleSpawnYPadding;
+
         //Create the second floor/wall set and make the beginning and end walls move
         Transform startFloor = transform.GetChild(0);
         GameObject spawnedFloor = Instantiate(floorAndWall, transform.position, Quaternion.identity, transform);
-
-        gameSpeedVector = new Vector3(-gameSpeed, 0, 0);
-
         startFloor.GetComponent<Rigidbody>().velocity = gameSpeedVector;
         spawnedFloor.GetComponent<Rigidbody>().velocity = gameSpeedVector;
 
@@ -41,14 +48,24 @@ public class JumpGameController : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
-        if(spawnTimer <= 0)
+        if(wallFloorSpawnTimer <= 0)
         {
             SpawnFloor();
-            spawnTimer = secondsBetweenSpawns;
+            wallFloorSpawnTimer = secondsBetweenSpawns;
         }
         else
         {
-            spawnTimer -= Time.deltaTime;
+            wallFloorSpawnTimer -= Time.deltaTime;
+        }
+
+        if(obstacleTimer <= 0)
+        {
+            SpawnObstacle();
+            obstacleTimer = secondsPerObstacle;
+        }
+        else
+        {
+            obstacleTimer -= Time.deltaTime;
         }
     }
 
@@ -56,5 +73,27 @@ public class JumpGameController : MonoBehaviour
     {
         GameObject spawnedFloor = Instantiate(floorAndWall, transform.position, Quaternion.identity, transform);
         spawnedFloor.GetComponent<Rigidbody>().velocity = gameSpeedVector;
+    }
+
+    void SpawnObstacle()
+    {
+        Vector3 spawnPos = transform.position + topVector;
+        int rand = Random.Range(0, 3);
+        if (rand == 0)
+        {
+            spawnPos = transform.position + bottomVector;
+        }
+        else if(rand == 1)
+        {
+            spawnPos = transform.position + middleVector;
+        }
+        GameObject spawnedObstacle = Instantiate(obstacle, spawnPos, Quaternion.identity, transform);
+        spawnedObstacle.GetComponent<Rigidbody>().velocity = gameSpeedVector;
+    }
+
+    public void fail()
+    {
+        Debug.Log("Jump Fail");
+        hasntFailed = false;
     }
 }
