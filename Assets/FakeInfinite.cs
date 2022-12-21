@@ -14,7 +14,7 @@ public class FakeInfinite : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
         if(Mathf.Abs(transform.localPosition.x) > distanceBeforeWarp)
         {
