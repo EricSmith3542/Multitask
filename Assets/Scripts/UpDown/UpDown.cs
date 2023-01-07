@@ -9,8 +9,6 @@ public class UpDown : MiniGame
 {
     private string OBSTACLE_TAG = "UpDownObstacle";
 
-    private PlayerInput PlayerInput;
-    private Rigidbody Rigidbody;
     private InputAction Move;
     private Transform gameCenter;
     private float initialZ;
@@ -41,7 +39,7 @@ public class UpDown : MiniGame
     {
         base.Start();
         initialZ = transform.position.z;
-        gameCenter = GameObject.Find("Up Down Game Objects").transform;
+        gameCenter = transform.parent;
         Move = GetComponent<PlayerInput>().actions["UpDown"];
         StartCoroutine(Spawning());
     }
@@ -51,13 +49,6 @@ public class UpDown : MiniGame
     {
         base.Update();
         MoveCube();
-
-        //Dont actually use this, just test code for controlling cameras
-        //Use something similar to this in the overall game controller
-        //if (gameFailed)
-        //{
-        //    gameCamera.rect = new Rect(Mathf.Lerp(gameCamera.rect.x, 0, Time.deltaTime * sizeChangeSpeed), 0, .5f, Mathf.Lerp(gameCamera.rect.height, .5f, Time.deltaTime * sizeChangeSpeed));
-        //}
     }
 
     private void OnTriggerEnter(Collider other)

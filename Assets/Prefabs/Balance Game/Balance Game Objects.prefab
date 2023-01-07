@@ -230,12 +230,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f955a3c996d19754480af02216a3c0e4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ball: {fileID: 3545097955955325934}
-  board: {fileID: 3545097955140337684}
+  spotLight: {fileID: 3545097954240283792}
   lightTempDangerMin: 6900
   lightTempDangerMax: 1500
   lightIntensityMin: 400
   lightIntensityMax: 1100
+  noDangerDistance: 2
+  ball: {fileID: 3545097955955325934}
+  board: {fileID: 3545097955140337684}
 --- !u!1 &3545097955066183916
 GameObject:
   m_ObjectHideFlags: 0
@@ -664,10 +666,9 @@ GameObject:
   m_Component:
   - component: {fileID: 3545097956108663524}
   - component: {fileID: 3545097956108663523}
-  - component: {fileID: 3545097956108663522}
   - component: {fileID: 3545097956108663525}
   m_Layer: 0
-  m_Name: Main Camera
+  m_Name: Balance Game Camera
   m_TagString: MainCamera
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -716,9 +717,9 @@ Camera:
   m_NormalizedViewPortRect:
     serializedVersion: 2
     x: 0
-    y: 0.5
-    width: 0.5
-    height: 0.5
+    y: 0
+    width: 1
+    height: 1
   near clip plane: 0.3
   far clip plane: 1000
   field of view: 60
@@ -739,14 +740,6 @@ Camera:
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
---- !u!81 &3545097956108663522
-AudioListener:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3545097956108663521}
-  m_Enabled: 1
 --- !u!114 &3545097956108663525
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -910,5 +903,5 @@ Transform:
   - {fileID: 3545097954240284014}
   - {fileID: 3545097955066183917}
   m_Father: {fileID: 0}
-  m_RootOrder: 1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

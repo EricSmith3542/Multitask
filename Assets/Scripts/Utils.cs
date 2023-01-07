@@ -9,8 +9,14 @@ public static class Utils
         return toMin + (value - fromMin)*(toMax - toMin)/(fromMax-fromMin);
     }
 
-    public static float Logerp(float a, float b, float t)
+    public static void Shuffle<T>(List<T> list)
     {
-        return a * Mathf.Pow(b / a, t);
+        for (int i = 0; i < list.Count; i++)
+        {
+            T val = list[i];
+            int randomIndex = Random.Range(i, list.Count);
+            list[i] = list[randomIndex];
+            list[randomIndex] = val;
+        }
     }
 }

@@ -540,6 +540,26 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1503744424234921904, guid: 47c62682d5afaa049aefb2247e9efcd5, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1503744424234921904, guid: 47c62682d5afaa049aefb2247e9efcd5, type: 3}
+      propertyPath: m_NormalizedViewPortRect.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1503744424234921904, guid: 47c62682d5afaa049aefb2247e9efcd5, type: 3}
+      propertyPath: m_NormalizedViewPortRect.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1503744424234921904, guid: 47c62682d5afaa049aefb2247e9efcd5, type: 3}
+      propertyPath: m_NormalizedViewPortRect.width
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1503744424234921904, guid: 47c62682d5afaa049aefb2247e9efcd5, type: 3}
+      propertyPath: m_NormalizedViewPortRect.height
+      value: 0.5
+      objectReference: {fileID: 0}
     - target: {fileID: 1503744424833329890, guid: 47c62682d5afaa049aefb2247e9efcd5, type: 3}
       propertyPath: m_RootOrder
       value: 3
@@ -649,6 +669,22 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2636032307820366202, guid: 1faa7ef32aadf25499c476043cafdbb6, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2636032307820366202, guid: 1faa7ef32aadf25499c476043cafdbb6, type: 3}
+      propertyPath: m_NormalizedViewPortRect.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2636032307820366202, guid: 1faa7ef32aadf25499c476043cafdbb6, type: 3}
+      propertyPath: m_NormalizedViewPortRect.width
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2636032307820366202, guid: 1faa7ef32aadf25499c476043cafdbb6, type: 3}
+      propertyPath: m_NormalizedViewPortRect.height
+      value: 0.5
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -662,6 +698,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 3165224745642816397, guid: e231efd04d1e3064d9897f4e0ad8b689, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3165224745642816397, guid: e231efd04d1e3064d9897f4e0ad8b689, type: 3}
+      propertyPath: m_NormalizedViewPortRect.width
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3165224745642816397, guid: e231efd04d1e3064d9897f4e0ad8b689, type: 3}
+      propertyPath: m_NormalizedViewPortRect.height
+      value: 0.5
+      objectReference: {fileID: 0}
     - target: {fileID: 3165224745895249064, guid: e231efd04d1e3064d9897f4e0ad8b689, type: 3}
       propertyPath: m_RootOrder
       value: 4
@@ -727,6 +775,22 @@ PrefabInstance:
       propertyPath: spotLight
       value: 
       objectReference: {fileID: 1456214784}
+    - target: {fileID: 3545097956108663523, guid: 472c38ebf7110714aa895cd0fa001c44, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3545097956108663523, guid: 472c38ebf7110714aa895cd0fa001c44, type: 3}
+      propertyPath: m_NormalizedViewPortRect.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3545097956108663523, guid: 472c38ebf7110714aa895cd0fa001c44, type: 3}
+      propertyPath: m_NormalizedViewPortRect.width
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3545097956108663523, guid: 472c38ebf7110714aa895cd0fa001c44, type: 3}
+      propertyPath: m_NormalizedViewPortRect.height
+      value: 0.5
+      objectReference: {fileID: 0}
     - target: {fileID: 3545097956310781877, guid: 472c38ebf7110714aa895cd0fa001c44, type: 3}
       propertyPath: m_Name
       value: Balance Game Objects
