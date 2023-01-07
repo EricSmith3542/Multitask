@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Rendering.HighDefinition;
 
 public class MouseGame : MonoBehaviour
 {
@@ -13,16 +14,29 @@ public class MouseGame : MonoBehaviour
     public float sensitivity = 1f;
     public float xPadding = 6f;
     public float yPadding = 3f;
-    public float secondsPerSpawn = 2f;
+    
     [SerializeField]
     private Camera gameCamera;
+
+    [Header("Danger Indicator Controls")]
+    [SerializeField]
+    private Light spotLight;
+    private HDAdditionalLightData hdSpotLight;
+    public float lightTempDangerMin = 6900;
+    public float lightTempDangerMax = 1500;
+    public float lightIntensityMin = 400;
+    public float lightIntensityMax = 1100;
+
+    [Header("Bomb Spawn Configuration")]
     [SerializeField]
     private GameObject collectable;
+    public float secondsPerSpawn = 2f;
 
     // Start is called before the first frame update
     void Start()
     {
         MouseMove = GetComponent<PlayerInput>().actions["MouseMove"];
+        hdSpotLight = spotLight.GetComponent<HDAdditionalLightData>();
         minX = transform.position.x - xPadding;
         maxX = transform.position.x + xPadding;
         minY = transform.position.y - yPadding;
@@ -53,11 +67,14 @@ public class MouseGame : MonoBehaviour
         if(other.tag == COLLECTABLE_TAG)
         {
             Destroy(other.gameObject);
+            spotLight.colorTemperature = lightTempDangerMin;
+            hdSpotLight.intensity = lightIntensityMin;
         }
     }
 
     private void SpawnCollectable()
     {
-        Instantiate(collectable, new Vector3(Random.Range(minX, maxX), Random.Range(minY, maxY), transform.position.z), Quaternion.identity);
+        GameObject ob = Instantiate(collectable, new Vector3(Random.Range(minX, maxX), Random.Range(minY, maxY), transform.position.z), Quaternion.identity);
+        ob.GetComponent<MouseGameBomb>().attachLight(spotLight, lightTempDangerMin, lightTempDangerMax, lightIntensityMin, lightIntensityMax);
     }
 }

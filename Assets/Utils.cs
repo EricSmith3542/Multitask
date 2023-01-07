@@ -8,4 +8,9 @@ public static class Utils
     {
         return toMin + (value - fromMin)*(toMax - toMin)/(fromMax-fromMin);
     }
+
+    public static float Logerp(float a, float b, float t)
+    {
+        return a * Mathf.Pow(b / a, t);
+    }
 }

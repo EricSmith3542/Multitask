@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Rendering.HighDefinition;
 
 [RequireComponent(typeof(PlayerInput))]
 public class UpDown : MonoBehaviour
@@ -39,8 +40,11 @@ public class UpDown : MonoBehaviour
     [Header("Danger Indicator Controls")]
     [SerializeField]
     private Light spotLight;
+    private HDAdditionalLightData hdSpotLight;
     public float lightTempDangerMin = 6900;
     public float lightTempDangerMax = 1500;
+    public float lightIntensityMin = 400;
+    public float lightIntensityMax = 1100;
     public float noDangerDistance = 2f;
 
     // Start is called before the first frame update
@@ -49,6 +53,7 @@ public class UpDown : MonoBehaviour
         initialZ = transform.position.z;
         gameCenter = GameObject.Find("Up Down Game Objects").transform;
         Move = GetComponent<PlayerInput>().actions["UpDown"];
+        hdSpotLight = spotLight.GetComponent<HDAdditionalLightData>();
         StartCoroutine(Spawning());
     }
 
@@ -60,14 +65,14 @@ public class UpDown : MonoBehaviour
         float closestDistance = 9999f;
         foreach (GameObject spawnedObstacle in GameObject.FindGameObjectsWithTag(OBSTACLE_TAG))
         {
-            float dist = Vector3.Distance(transform.position, spawnedObstacle.transform.position);
+            float dist = Vector3.Distance(transform.position, spawnedObstacle.GetComponent<Collider>().ClosestPoint(transform.position));
             if (dist < closestDistance)
             {
                 closestDistance = dist;
             }
         }
-        spotLight.colorTemperature = Utils.MapFloat(closestDistance, noDangerDistance, 0, lightTempDangerMin, lightTempDangerMax);
-
+        spotLight.colorTemperature = Utils.MapFloat(Mathf.Min(closestDistance, noDangerDistance), noDangerDistance, 0, lightTempDangerMin, lightTempDangerMax);
+        hdSpotLight.intensity = Utils.MapFloat(Mathf.Min(closestDistance, noDangerDistance), noDangerDistance, 0, lightIntensityMin, lightIntensityMax);
         //Dont actually use this, just test code for controlling cameras
         //Use something similar to this in the overall game controller
         //if (gameFailed)
