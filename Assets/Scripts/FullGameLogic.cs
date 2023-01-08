@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class FullGameLogic : MonoBehaviour
 {
-    private const float VIEWPORT_BUFFER = .1f;
     [Header("UI Components")]
     [SerializeField]
     private GameObject StartScreenUI;
@@ -21,18 +20,22 @@ public class FullGameLogic : MonoBehaviour
     private float cameraTransitionSpeed = 1f;
     [SerializeField]
     private float secondsToWaitAfterTransition = 2f;
+    [SerializeField]
+    private float viewPortSnapFinishRange = .01f;
 
     private bool gameStarted = false;
-    private bool shuffle = false;
+    private bool shuffle = true;
     private bool movingCameras = false;
 
     private int currentGameIndex = 0;
     private float yDistanceBetweenGames = 50f;
 
-    private Camera shrinkingCamera;
+    private List<Camera> shrinkingCameras;
     private Camera growingCamera;
     private Rect finalGrowingRect;
     private Rect finalShrinkingRect;
+    private bool jumpGameCameraShiftNeeded = false;
+    private bool growHorizontal;
 
     // Start is called before the first frame update
     void Start()
@@ -52,78 +55,136 @@ public class FullGameLogic : MonoBehaviour
         {
             
             gameStarted = true;
-            AddNextGame(timeBetweenGameAdds);
+            StartCoroutine(AddNextGame(0));
         }
 
-        //TODO: FIX THIS STUFF for some reason it never stops changing the camera size
         if (movingCameras)
         {
-            float growingX = Mathf.Lerp(growingCamera.rect.x, finalGrowingRect.x, Time.unscaledDeltaTime * cameraTransitionSpeed);
-            float growingY = Mathf.Lerp(growingCamera.rect.y, finalGrowingRect.y, Time.unscaledDeltaTime * cameraTransitionSpeed);
-            float growingWidth = Mathf.Lerp(growingCamera.rect.width, finalGrowingRect.width + VIEWPORT_BUFFER, Time.unscaledDeltaTime * cameraTransitionSpeed);
-            float growingHeight = Mathf.Lerp(growingCamera.rect.height, finalGrowingRect.height + VIEWPORT_BUFFER, Time.unscaledDeltaTime * cameraTransitionSpeed);
+            AdjustViewports();
+        }
+    }
 
-            float shrinkingX = Mathf.Lerp(shrinkingCamera.rect.x, finalShrinkingRect.x, Time.unscaledDeltaTime * cameraTransitionSpeed);
-            float shrinkingY = Mathf.Lerp(shrinkingCamera.rect.y, finalShrinkingRect.y, Time.unscaledDeltaTime * cameraTransitionSpeed);
-            float shrinkingWidth = Mathf.Lerp(shrinkingCamera.rect.width, finalShrinkingRect.width - VIEWPORT_BUFFER, Time.unscaledDeltaTime * cameraTransitionSpeed);
-            float shrinkingHeight = Mathf.Lerp(shrinkingCamera.rect.height, finalShrinkingRect.height - VIEWPORT_BUFFER, Time.unscaledDeltaTime * cameraTransitionSpeed);
+    IEnumerator AddNextGame(float secondsUntilNextGame)
+    {
+        yield return new WaitForSeconds(secondsUntilNextGame);
 
-            growingCamera.rect = new Rect(growingX, growingY, growingWidth, growingHeight);
-            shrinkingCamera.rect = new Rect(shrinkingX, shrinkingY, shrinkingWidth, shrinkingHeight);
-            if(isRectLarger(growingCamera.rect, finalGrowingRect) && isRectLarger(finalShrinkingRect, shrinkingCamera.rect))
+        Time.timeScale = 0;
+        //Create new game and add its camera to the list of cameras
+        GameObject newGame = Instantiate(miniGamePrefabs[currentGameIndex], new Vector3(0, (currentGameIndex + 1) * yDistanceBetweenGames, 0), Quaternion.identity, transform);
+
+        //The jump game is the only game where the camera isnt centered on the controllable piece, so when the viewport ratio isn't 1:1, the camera needs to be shifted to keep the jumper on the screen
+        //TODO: Assess a better fix to this
+        if(newGame.tag.Equals("Jump Game"))
+        {
+            jumpGameCameraShiftNeeded = true;
+        }
+
+        //Add the games camera to the list of cameras
+        Camera gameCam = newGame.GetComponentInChildren<Camera>();
+        growingCamera = gameCam;
+        
+        TransitionCameras();
+    }
+
+    void AdjustViewports()
+    {
+        float growingX = Mathf.LerpUnclamped(growingCamera.rect.x, finalGrowingRect.x, Time.unscaledDeltaTime * cameraTransitionSpeed);
+        float growingY = Mathf.LerpUnclamped(growingCamera.rect.y, finalGrowingRect.y, Time.unscaledDeltaTime * cameraTransitionSpeed);
+        float growingWidth = Mathf.LerpUnclamped(growingCamera.rect.width, finalGrowingRect.width, Time.unscaledDeltaTime * cameraTransitionSpeed);
+        float growingHeight = Mathf.LerpUnclamped(growingCamera.rect.height, finalGrowingRect.height, Time.unscaledDeltaTime * cameraTransitionSpeed);
+
+        growingCamera.rect = new Rect(growingX, growingY, growingWidth, growingHeight);
+
+        for(int i = 0; i < shrinkingCameras.Count; i++)
+        {
+            Camera shrinkingCamera = shrinkingCameras[i];
+            //float shrinkingX = Mathf.LerpUnclamped(shrinkingCamera.rect.x, finalShrinkingRect.x, Time.unscaledDeltaTime * cameraTransitionSpeed);
+            float shrinkingY = Mathf.LerpUnclamped(shrinkingCamera.rect.y, finalShrinkingRect.y, Time.unscaledDeltaTime * cameraTransitionSpeed);
+            float shrinkingWidth = Mathf.LerpUnclamped(shrinkingCamera.rect.width, finalShrinkingRect.width, Time.unscaledDeltaTime * cameraTransitionSpeed);
+            float shrinkingHeight = Mathf.LerpUnclamped(shrinkingCamera.rect.height, finalShrinkingRect.height, Time.unscaledDeltaTime * cameraTransitionSpeed);
+
+            shrinkingCamera.rect = new Rect(shrinkingCamera.rect.x, growHorizontal ? shrinkingCamera.rect.y:shrinkingY, shrinkingWidth, shrinkingHeight);
+        }
+        
+
+        //Check if we are done changing the cameras
+        if (isViewportNearTargetSize(growingCamera.rect, finalGrowingRect))
+        {
+            movingCameras = false;
+
+            //Set the viewports to be exactly the correct size
+            growingCamera.rect = new Rect(finalGrowingRect);
+
+            foreach(Camera shrinkingCamera in shrinkingCameras)
             {
-                 movingCameras = false;
+                shrinkingCamera.rect = new Rect(shrinkingCamera.rect.x, growHorizontal ? shrinkingCamera.rect.y:finalShrinkingRect.y, finalShrinkingRect.width, finalShrinkingRect.height);
+            }
+            
 
-                //Set the viewports to be exactly the correct size
-                growingCamera.rect = new Rect(finalGrowingRect);
-                shrinkingCamera.rect = new Rect(finalShrinkingRect);
+            //Add the camera to the list of cameras for the next transition
+            gameCameras.Add(growingCamera);
 
-                //TODO: Add some trigger here to start some indication to the player that the game will be unfreezing soon, maybe change the WaitForSeconds below to a WaitUntil so that the timing is decoupled
+            //TODO: Add some trigger here to start some indication to the player that the game will be unfreezing soon, maybe change the WaitForSeconds below to a WaitUntil so that the timing is decoupled
 
 
-                //Deactive the main menu object when done transitioning only on the first game
-                if (currentGameIndex == 0) { StartScreenUI.SetActive(false); }
+            //Deactive the main menu object when done transitioning only on the first game
+            if (currentGameIndex == 0) { StartScreenUI.SetActive(false); }
 
-                ////Wait and unfreeze game
-                //yield return new WaitForSecondsRealtime(secondsToWaitAfterTransition);
-                Time.timeScale = 1;
-                currentGameIndex++;
+            ////Wait and unfreeze game
+            //yield return new WaitForSecondsRealtime(secondsToWaitAfterTransition);
+            Time.timeScale = 1;
+            currentGameIndex++;
+            if(currentGameIndex < miniGamePrefabs.Count)
+            {
+                StartCoroutine(AddNextGame(timeBetweenGameAdds));
             }
         }
     }
 
-    void AddNextGame(float secondsUntilNextGame)
-    {
-        Time.timeScale = 0;
-        //Create new game and add its camera to the list of cameras
-        GameObject newGame = Instantiate(miniGamePrefabs[currentGameIndex], new Vector3(0, currentGameIndex * yDistanceBetweenGames, 0), Quaternion.identity, transform);
-        Camera gameCam = newGame.GetComponentInChildren<Camera>();
-        gameCameras.Add(gameCam);
-
-        TransitionCameras();
-    }
-
     void TransitionCameras()
     {
+        Rect startRect;
+        shrinkingCameras = gameCameras;
+        
         //The first game is a special case since it uses the menu instead of other games
         if (currentGameIndex == 0)
         {
-            shrinkingCamera = StartScreenUI.GetComponentInChildren<Camera>();
-            growingCamera = gameCameras[currentGameIndex];
+            shrinkingCameras = new List<Camera>() { StartScreenUI.GetComponentInChildren<Camera>() };
 
-            Rect startRect = new Rect(0f, 0f, 0f, 1f);
+            startRect = new Rect(1f, 0f, 0f, 1f);
             finalGrowingRect = new Rect(0f, 0f, 1f, 1f);
             finalShrinkingRect = new Rect(0f, 0f, 0f, 1f);
-
-            //Set the cameras starting ViewPort
-            growingCamera.rect = new Rect(startRect);
-            movingCameras = true;
         }
+        else
+        {
+            //Grab the viewport of the previously added camera
+            Rect preExistingCameraViewport = gameCameras[currentGameIndex-1].rect;
+
+            //Determine start and finish viewport sizes depending on the game index
+            growHorizontal = currentGameIndex % 2 == 1;
+            if (growHorizontal)
+            {
+                startRect = new Rect(1f, 0f, 0f, preExistingCameraViewport.height);
+                finalGrowingRect = new Rect(.5f, preExistingCameraViewport.y, preExistingCameraViewport.width / 2, preExistingCameraViewport.height);
+                finalShrinkingRect = new Rect(preExistingCameraViewport.x, preExistingCameraViewport.y, preExistingCameraViewport.width / 2, preExistingCameraViewport.height);
+            }
+            else
+            {
+                startRect = new Rect(0f, 0f, 1f, 0f);
+                finalGrowingRect = new Rect(0f, 0f, 1f, preExistingCameraViewport.height / 2);
+                finalShrinkingRect = new Rect(preExistingCameraViewport.x, (1 - preExistingCameraViewport.y) / 2, preExistingCameraViewport.width, preExistingCameraViewport.height/2);
+            }
+            
+        }
+
+        //Set the cameras starting ViewPort
+        growingCamera.rect = new Rect(startRect);
+        movingCameras = true;
     }
 
     //Method returns true if both the height and width of rect1 are >= rect2's
-    bool isRectLarger(Rect rect1, Rect rect2)
+    bool isViewportNearTargetSize(Rect rect1, Rect rect2)
     {
-        return (rect1.width >= rect2.width) && (rect1.height >= rect2.height);
+        return (rect1.width >= rect2.width - viewPortSnapFinishRange) && (rect1.height >= rect2.height - viewPortSnapFinishRange);
     }
 }

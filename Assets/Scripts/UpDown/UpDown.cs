@@ -64,7 +64,7 @@ public class UpDown : MiniGame
     {
         yield return new WaitForSeconds(secondsBetweenSpawns);
         int randomDirection = (Random.Range(0, 2) * 2 - 1);
-        Vector3 spawnPoint = new Vector3(spawnPointPadding * randomDirection, transform.localPosition.y + Random.Range(-spawnFuzziness, spawnFuzziness), initialZ) + gameCenter.localPosition;
+        Vector3 spawnPoint = new Vector3(spawnPointPadding * randomDirection, transform.localPosition.y + Random.Range(-spawnFuzziness, spawnFuzziness), initialZ) + gameCenter.position;
         GameObject spawned = Instantiate(obstacle, spawnPoint, gameCenter.localRotation, gameCenter);
         UpDownObstacle ob = spawned.GetComponent<UpDownObstacle>();
         ob.setDeleteDistance((spawnPointPadding + 1) * randomDirection);

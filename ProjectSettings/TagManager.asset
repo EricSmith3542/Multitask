@@ -7,6 +7,10 @@ TagManager:
   - UpDownObstacle
   - JumpObstacle
   - MouseCollect
+  - Balance Game
+  - Jump Game
+  - Mouse Game
+  - UpDown Game
   layers:
   - Default
   - TransparentFX
