@@ -16,7 +16,10 @@ public class MouseGame : MonoBehaviour
     public float sensitivity = 1f;
     public float xPadding = 6f;
     public float yPadding = 3f;
-    
+
+    private float cameraScaledMinX;
+    private float cameraScaledMaxX;
+
     [SerializeField]
     private Camera gameCamera;
 
@@ -50,8 +53,12 @@ public class MouseGame : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        float cameraRatio = (gameCamera.rect.width / gameCamera.rect.height);
+        cameraScaledMinX = minX * cameraRatio;
+        cameraScaledMaxX = maxX * cameraRatio;
+
         Vector2 move = MouseMove.ReadValue<Vector2>() * Time.deltaTime * sensitivity;
-        transform.position = new Vector3(Mathf.Clamp(transform.position.x + move.x, minX, maxX), Mathf.Clamp(transform.position.y + move.y, minY, maxY), 0);
+        transform.position = new Vector3(Mathf.Clamp(transform.position.x + move.x, cameraScaledMinX, cameraScaledMaxX), Mathf.Clamp(transform.position.y + move.y, minY, maxY), 0);
 
         if (spawnTimer <= 0)
         {
@@ -76,7 +83,7 @@ public class MouseGame : MonoBehaviour
 
     private void SpawnCollectable()
     {
-        GameObject ob = Instantiate(collectable, new Vector3(Random.Range(minX, maxX), Random.Range(minY, maxY), transform.position.z), Quaternion.identity);
+        GameObject ob = Instantiate(collectable, new Vector3(Random.Range(cameraScaledMinX, cameraScaledMaxX), Random.Range(minY, maxY), transform.position.z), Quaternion.identity);
         ob.GetComponent<MouseGameBomb>().attachLight(spotLight, lightTempDangerMin, lightTempDangerMax, lightIntensityMin, lightIntensityMax);
     }
 }

@@ -1,12 +1,16 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class FullGameLogic : MonoBehaviour
 {
     [Header("UI Components")]
     [SerializeField]
     private GameObject StartScreenUI;
+    [SerializeField]
+    private TMP_Text timerText;
+    private float totalTime = 0f;
 
     [Header("Games")]
     [SerializeField]
@@ -70,17 +74,29 @@ public class FullGameLogic : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!gameStarted && Input.anyKey)
+
+        if (!gameStarted)
         {
-            
-            gameStarted = true;
-            StartCoroutine(AddNextGame(0));
+            if (Input.anyKey)
+            {
+                gameStarted = true;
+                StartCoroutine(AddNextGame(0));
+            }
+        }
+        else
+        {
+            if (movingCameras)
+            {
+                AdjustViewports();
+            }
+            else
+            {
+                totalTime += Time.deltaTime;
+                timerText.text = totalTime.ToString("0.0");
+            }
         }
 
-        if (movingCameras)
-        {
-            AdjustViewports();
-        }
+        
     }
 
     IEnumerator AddNextGame(float secondsUntilNextGame)
@@ -110,12 +126,19 @@ public class FullGameLogic : MonoBehaviour
         for(int i = 0; i < shrinkingCameras.Count; i++)
         {
             Camera shrinkingCamera = shrinkingCameras[i];
-            //float shrinkingX = Mathf.LerpUnclamped(shrinkingCamera.rect.x, finalShrinkingRect.x, Time.unscaledDeltaTime * cameraTransitionSpeed);
+
+            //This is essentially: "If we are looking at the thrid game added while adding the forth game, slide the camera to the left"
+            float shrinkingX = shrinkingCamera.rect.x;
+            if (shrinkingCamera.rect.x != 0f && !(shrinkingCamera.rect.x >= .5f))
+            {
+                shrinkingX = Mathf.LerpUnclamped(shrinkingCamera.rect.x, 0f, Time.unscaledDeltaTime * cameraTransitionSpeed);
+            }
+
             float shrinkingY = Mathf.LerpUnclamped(shrinkingCamera.rect.y, finalShrinkingRect.y, Time.unscaledDeltaTime * cameraTransitionSpeed);
             float shrinkingWidth = Mathf.LerpUnclamped(shrinkingCamera.rect.width, finalShrinkingRect.width, Time.unscaledDeltaTime * cameraTransitionSpeed);
             float shrinkingHeight = Mathf.LerpUnclamped(shrinkingCamera.rect.height, finalShrinkingRect.height, Time.unscaledDeltaTime * cameraTransitionSpeed);
-
-            shrinkingCamera.rect = new Rect(shrinkingCamera.rect.x, growHorizontal ? shrinkingCamera.rect.y:shrinkingY, shrinkingWidth, shrinkingHeight);
+            
+            shrinkingCamera.rect = new Rect(shrinkingX, growHorizontal ? shrinkingCamera.rect.y:shrinkingY, shrinkingWidth, shrinkingHeight);
         }
 
         //Jank Jump Game Camera fix
@@ -151,7 +174,12 @@ public class FullGameLogic : MonoBehaviour
 
             foreach(Camera shrinkingCamera in shrinkingCameras)
             {
-                shrinkingCamera.rect = new Rect(shrinkingCamera.rect.x, growHorizontal ? shrinkingCamera.rect.y:finalShrinkingRect.y, finalShrinkingRect.width, finalShrinkingRect.height);
+                float targetX = shrinkingCamera.rect.x;
+                if (targetX != 0f && targetX != .5f)
+                {
+                    targetX = 0f;
+                }
+                shrinkingCamera.rect = new Rect(targetX, growHorizontal ? shrinkingCamera.rect.y:finalShrinkingRect.y, finalShrinkingRect.width, finalShrinkingRect.height);
             }
 
             if (jumpGameCameraShiftNeeded && currentGameIndex >= 1)
@@ -211,13 +239,13 @@ public class FullGameLogic : MonoBehaviour
             if (growHorizontal)
             {
                 startRect = new Rect(1f, 0f, 0f, preExistingCameraViewport.height);
-                finalGrowingRect = new Rect(.5f, preExistingCameraViewport.y, preExistingCameraViewport.width / 2, preExistingCameraViewport.height);
-                finalShrinkingRect = new Rect(preExistingCameraViewport.x, preExistingCameraViewport.y, preExistingCameraViewport.width / 2, preExistingCameraViewport.height);
+                finalGrowingRect = new Rect(.5f, preExistingCameraViewport.y, .5f, preExistingCameraViewport.height);
+                finalShrinkingRect = new Rect(preExistingCameraViewport.x, preExistingCameraViewport.y, .5f, preExistingCameraViewport.height);
             }
             else
             {
                 startRect = new Rect(0f, 0f, 1f, 0f);
-                finalGrowingRect = new Rect(0f, 0f, 1f, preExistingCameraViewport.height / 2);
+                finalGrowingRect = new Rect(.25f, 0f, .5f, preExistingCameraViewport.height / 2);
                 finalShrinkingRect = new Rect(preExistingCameraViewport.x, (1 - preExistingCameraViewport.y) / 2, preExistingCameraViewport.width, preExistingCameraViewport.height/2);
             }
             

@@ -9,22 +9,25 @@ using UnityEngine.Rendering.HighDefinition;
 public class Jumper : MiniGame
 {
     private const string OBSTACLE_TAG = "JumpObstacle";
-    
+
     private InputAction Jump;
-    private float maxJumpHeight;
     private Rigidbody rb;
 
 
     [Header("Jump Settings")]
     [SerializeField]
     private JumpGameController controller;
-    public float maxJumpForce = 1f;
+    [SerializeField]
+    private float maxJumpForce = 1f;
+    [SerializeField]
+    private float maxJumpHeight = 9.5f;
+
 
     new void Start()
     {
         base.Start();
+        maxJumpHeight = transform.position.y + maxJumpHeight;
         Jump = GetComponent<PlayerInput>().actions["Jump"];
-        maxJumpHeight = transform.position.y + 5;
         rb = GetComponent<Rigidbody>();
     }
 

@@ -402,7 +402,7 @@ Light:
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Intensity: 400
   m_Range: 31.58
-  m_SpotAngle: 110.9
+  m_SpotAngle: 179
   m_InnerSpotAngle: 21.80208
   m_CookieSize: 10
   m_Shadows:
@@ -698,12 +698,11 @@ MonoBehaviour:
   lightIntensityMax: 1100
   noDangerDistance: 2
   moveSpeedMultiplier: 0.1
-  maxHeight: 3.65
+  maxHeight: 4.4
   rotateX: 0.1
   rotateY: 0.1
   rotateZ: 0.1
   gameCamera: {fileID: 1503744424234921904}
-  sizeChangeSpeed: 2
   obstacle: {fileID: 4927272557024709265, guid: f0205ddac247b554595a02efc578cece, type: 3}
   spawnPointPadding: 5
   spawnFuzziness: 1

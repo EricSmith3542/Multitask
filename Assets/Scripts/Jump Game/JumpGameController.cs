@@ -37,10 +37,10 @@ public class JumpGameController : MonoBehaviour
         middleVector = Vector3.up * middleSpawnYPadding;
 
         //Create the second floor/wall set and make the beginning and end walls move
-        Transform startFloor = transform.GetChild(0);
-        GameObject spawnedFloor = Instantiate(floorAndWall, transform.position, Quaternion.identity, transform);
-        startFloor.GetComponent<Rigidbody>().velocity = gameSpeedVector;
-        spawnedFloor.GetComponent<Rigidbody>().velocity = gameSpeedVector;
+        //Transform startFloor = transform.GetChild(0);
+        //GameObject spawnedFloor = Instantiate(floorAndWall, transform.position, Quaternion.identity, transform);
+        //startFloor.GetComponent<Rigidbody>().velocity = gameSpeedVector;
+        //spawnedFloor.GetComponent<Rigidbody>().velocity = gameSpeedVector;
 
 
     }
@@ -48,15 +48,15 @@ public class JumpGameController : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
-        if(wallFloorSpawnTimer <= 0)
-        {
-            SpawnFloor();
-            wallFloorSpawnTimer = secondsBetweenSpawns;
-        }
-        else
-        {
-            wallFloorSpawnTimer -= Time.deltaTime;
-        }
+        //if(wallFloorSpawnTimer <= 0)
+        //{
+        //    SpawnFloor();
+        //    wallFloorSpawnTimer = secondsBetweenSpawns;
+        //}
+        //else
+        //{
+        //    wallFloorSpawnTimer -= Time.deltaTime;
+        //}
 
         if(obstacleTimer <= 0)
         {

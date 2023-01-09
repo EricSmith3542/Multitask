@@ -24,7 +24,6 @@ public class UpDown : MiniGame
     [Header("Camera")]
     [SerializeField]
     private Camera gameCamera;
-    public float sizeChangeSpeed = 2f;
 
     [Header("Spawner Controls")]
     [SerializeField]
