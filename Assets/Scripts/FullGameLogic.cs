@@ -22,9 +22,10 @@ public class FullGameLogic : MonoBehaviour
     private float secondsToWaitAfterTransition = 2f;
     [SerializeField]
     private float viewPortSnapFinishRange = .01f;
+    [SerializeField]
+    private bool shuffle = true;
 
     private bool gameStarted = false;
-    private bool shuffle = true;
     private bool movingCameras = false;
 
     private int currentGameIndex = 0;
@@ -34,8 +35,15 @@ public class FullGameLogic : MonoBehaviour
     private Camera growingCamera;
     private Rect finalGrowingRect;
     private Rect finalShrinkingRect;
-    private bool jumpGameCameraShiftNeeded = false;
     private bool growHorizontal;
+
+
+    //Jank Jumpgame fix variables
+    private const float JUMP_CAM_SHIFT = -3.5f;
+    private bool jumpGameCameraShiftNeeded = false;
+    private bool jumpGameUnshift = false;
+    private int jumpGameCameraIndex = 0;
+    private Camera jumpGameCamera = null;
 
     // Start is called before the first frame update
     void Start()
@@ -46,6 +54,17 @@ public class FullGameLogic : MonoBehaviour
             Utils.Shuffle(miniGamePrefabs);
         }
         gameCameras = new List<Camera>();
+
+        //The jump game is the only game where the camera isnt centered on the controllable piece, so when the viewport ratio isn't 1:1, the camera needs to be shifted to keep the jumper on the screen
+        //TODO: Assess a better fix to this
+        if (miniGamePrefabs[0].tag.Equals("Jump Game") || miniGamePrefabs[1].tag.Equals("Jump Game"))
+        {
+            jumpGameCameraShiftNeeded = true;
+            if(miniGamePrefabs[1].tag.Equals("Jump Game"))
+            {
+                jumpGameCameraIndex = 1;
+            }
+        }
     }
 
     // Update is called once per frame
@@ -71,13 +90,6 @@ public class FullGameLogic : MonoBehaviour
         Time.timeScale = 0;
         //Create new game and add its camera to the list of cameras
         GameObject newGame = Instantiate(miniGamePrefabs[currentGameIndex], new Vector3(0, (currentGameIndex + 1) * yDistanceBetweenGames, 0), Quaternion.identity, transform);
-
-        //The jump game is the only game where the camera isnt centered on the controllable piece, so when the viewport ratio isn't 1:1, the camera needs to be shifted to keep the jumper on the screen
-        //TODO: Assess a better fix to this
-        if(newGame.tag.Equals("Jump Game"))
-        {
-            jumpGameCameraShiftNeeded = true;
-        }
 
         //Add the games camera to the list of cameras
         Camera gameCam = newGame.GetComponentInChildren<Camera>();
@@ -105,6 +117,28 @@ public class FullGameLogic : MonoBehaviour
 
             shrinkingCamera.rect = new Rect(shrinkingCamera.rect.x, growHorizontal ? shrinkingCamera.rect.y:shrinkingY, shrinkingWidth, shrinkingHeight);
         }
+
+        //Jank Jump Game Camera fix
+        if (jumpGameCameraShiftNeeded && currentGameIndex >= 1)
+        {
+            if (!jumpGameCamera)
+            {
+                if (jumpGameCameraIndex == 0)
+                {
+                    jumpGameCamera = shrinkingCameras[0];
+                }
+                else
+                {
+                    jumpGameCamera = growingCamera;
+                }
+            }
+            
+            jumpGameCamera.transform.position = new Vector3(Mathf.LerpUnclamped(jumpGameCamera.transform.position.x, JUMP_CAM_SHIFT, Time.unscaledDeltaTime * cameraTransitionSpeed), jumpGameCamera.transform.position.y, jumpGameCamera.transform.position.z);
+        }
+        else if (jumpGameUnshift)
+        {
+            jumpGameCamera.transform.position = new Vector3(Mathf.LerpUnclamped(jumpGameCamera.transform.position.x, 0, Time.unscaledDeltaTime * cameraTransitionSpeed), jumpGameCamera.transform.position.y, jumpGameCamera.transform.position.z);
+        }
         
 
         //Check if we are done changing the cameras
@@ -118,6 +152,18 @@ public class FullGameLogic : MonoBehaviour
             foreach(Camera shrinkingCamera in shrinkingCameras)
             {
                 shrinkingCamera.rect = new Rect(shrinkingCamera.rect.x, growHorizontal ? shrinkingCamera.rect.y:finalShrinkingRect.y, finalShrinkingRect.width, finalShrinkingRect.height);
+            }
+
+            if (jumpGameCameraShiftNeeded && currentGameIndex >= 1)
+            {
+                jumpGameCamera.transform.position = new Vector3(JUMP_CAM_SHIFT, jumpGameCamera.transform.position.y, jumpGameCamera.transform.position.z);
+                jumpGameCameraShiftNeeded = false;
+                jumpGameUnshift = true;
+            }
+            else if (jumpGameUnshift)
+            {
+                jumpGameCamera.transform.position = new Vector3(0f, jumpGameCamera.transform.position.y, jumpGameCamera.transform.position.z);
+                jumpGameUnshift = false;
             }
             
 

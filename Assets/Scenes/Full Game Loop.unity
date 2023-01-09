@@ -868,13 +868,14 @@ MonoBehaviour:
   StartScreenUI: {fileID: 344525096}
   miniGamePrefabs:
   - {fileID: 3545097956310781877, guid: 472c38ebf7110714aa895cd0fa001c44, type: 3}
-  - {fileID: 1503744424833329891, guid: 47c62682d5afaa049aefb2247e9efcd5, type: 3}
   - {fileID: 3165224745895249065, guid: e231efd04d1e3064d9897f4e0ad8b689, type: 3}
+  - {fileID: 1503744424833329891, guid: 47c62682d5afaa049aefb2247e9efcd5, type: 3}
   - {fileID: 2636032306154223330, guid: 1faa7ef32aadf25499c476043cafdbb6, type: 3}
   timeBetweenGameAdds: 30
   cameraTransitionSpeed: 2
   secondsToWaitAfterTransition: 2
   viewPortSnapFinishRange: 0.01
+  shuffle: 0
 --- !u!4 &815178205
 Transform:
   m_ObjectHideFlags: 0
