@@ -5,8 +5,11 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/First 4 Games Test.unity
     guid: 9fc0d4010bbf28b4594072e72b8655ab
+  - enabled: 1
+    path: Assets/Scenes/Full Game Loop.unity
+    guid: 671800f96c2e41e48afaaa94cc6c571a
   m_configObjects:
     com.unity.input.settings: {fileID: 11400000, guid: c22a9830729b2bb41b8942fa762458dd, type: 2}

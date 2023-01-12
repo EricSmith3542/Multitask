@@ -34,7 +34,6 @@ public class MouseGameBomb : MonoBehaviour
     {
         timeElapsed += Time.deltaTime;
         float xForFunction = Utils.MapFloat(timeElapsed, 0, 5, 5, 0);
-        //currentSpeed = Mathf.Log((Time.deltaTime + 1/ Mathf.Exp(maxShakeSpeed / lifeTimeSeconds)) * Mathf.Exp(maxShakeSpeed / lifeTimeSeconds));
         currentAmount = Mathf.Pow(.2f, xForFunction) * maxShakeAmount;
 
         Vector2 shake = Random.insideUnitCircle * (Time.deltaTime * currentAmount);

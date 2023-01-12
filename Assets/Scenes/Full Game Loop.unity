@@ -2281,11 +2281,12 @@ MonoBehaviour:
   StartScreenUI: {fileID: 344525096}
   RestartScreenUI: {fileID: 617036027}
   timerText: {fileID: 306079078}
+  miniGameHolder: {fileID: 2087642834}
   miniGamePrefabs:
   - {fileID: 2636032306154223330, guid: 1faa7ef32aadf25499c476043cafdbb6, type: 3}
+  - {fileID: 3545097956310781877, guid: 472c38ebf7110714aa895cd0fa001c44, type: 3}
   - {fileID: 1503744424833329891, guid: 47c62682d5afaa049aefb2247e9efcd5, type: 3}
   - {fileID: 3165224745895249065, guid: e231efd04d1e3064d9897f4e0ad8b689, type: 3}
-  - {fileID: 3545097956310781877, guid: 472c38ebf7110714aa895cd0fa001c44, type: 3}
   timeBetweenGameAdds: 10
   cameraTransitionSpeed: 5
   viewPortSnapFinishRange: 0.001
@@ -2307,6 +2308,7 @@ Transform:
   - {fileID: 121447612}
   - {fileID: 1004570563}
   - {fileID: 1513993324}
+  - {fileID: 2087642835}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -3779,3 +3781,34 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2073763562}
   m_CullTransparentMesh: 1
+--- !u!1 &2087642834
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2087642835}
+  m_Layer: 0
+  m_Name: MiniGameHolder
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2087642835
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2087642834}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 815178205}
+  m_RootOrder: -1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

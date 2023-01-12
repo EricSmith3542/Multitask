@@ -24,8 +24,7 @@ public class MouseGame : MonoBehaviour
     private Camera gameCamera;
 
     [Header("Danger Indicator Controls")]
-    [SerializeField]
-    private Light spotLight;
+    [SerializeField] private Light spotLight;
     private HDAdditionalLightData hdSpotLight;
     public float lightTempDangerMin = 6900;
     public float lightTempDangerMax = 1500;
@@ -33,8 +32,8 @@ public class MouseGame : MonoBehaviour
     public float lightIntensityMax = 1100;
 
     [Header("Bomb Spawn Configuration")]
-    [SerializeField]
-    private GameObject collectable;
+    [SerializeField] private GameObject collectable;
+    [SerializeField] private GameObject bombHolder;
     public float secondsPerSpawn = 2f;
 
     // Start is called before the first frame update
@@ -83,7 +82,7 @@ public class MouseGame : MonoBehaviour
 
     private void SpawnCollectable()
     {
-        GameObject ob = Instantiate(collectable, new Vector3(Random.Range(cameraScaledMinX, cameraScaledMaxX), Random.Range(minY, maxY), transform.position.z), Quaternion.identity);
+        GameObject ob = Instantiate(collectable, new Vector3(Random.Range(cameraScaledMinX, cameraScaledMaxX), Random.Range(minY, maxY), transform.position.z), Quaternion.identity, bombHolder.transform);
         ob.GetComponent<MouseGameBomb>().attachLight(spotLight, lightTempDangerMin, lightTempDangerMax, lightIntensityMin, lightIntensityMax);
     }
 }

@@ -11,9 +11,9 @@ public class FullGameLogic : MonoBehaviour
     [SerializeField] private TMP_Text timerText;
 
     [Header("Games")]
+    [SerializeField] private GameObject miniGameHolder;
     [SerializeField] private List<GameObject> miniGamePrefabs;
     
-
     [Header("Game Logic Settings")]
     [SerializeField] private float timeBetweenGameAdds = 15f;
     [SerializeField] private float cameraTransitionSpeed = 1f;
@@ -40,6 +40,7 @@ public class FullGameLogic : MonoBehaviour
     private bool growHorizontal;
     private bool movingCameras = false;
     private bool failed = false;
+    private bool firstGame = true;
 
 
     //Jank Jumpgame fix variables
@@ -52,12 +53,7 @@ public class FullGameLogic : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        //TODO: This Shuffle parameter will be used more later when I add more configuration options to how people want to play the game
-        if (shuffleGames)
-        {
-            Utils.Shuffle(miniGamePrefabs);
-        }
-        gameCameras = new List<Camera>();
+        GameSetup();
 
         //The jump game is the only game where the camera isnt centered on the controllable piece, so when the viewport ratio isn't 1:1, the camera needs to be shifted to keep the jumper on the screen
         //TODO: Assess a better fix to this
@@ -80,6 +76,7 @@ public class FullGameLogic : MonoBehaviour
             if (Input.anyKey)
             {
                 gameStarted = true;
+                failed = false;
                 StartCoroutine(AddNextGame(0));
             }
         }
@@ -88,6 +85,16 @@ public class FullGameLogic : MonoBehaviour
             if (movingCameras)
             {
                 AdjustViewports();
+            }
+            else if(failed){
+                GameSetup();
+                foreach (Transform game in miniGameHolder.transform)
+                {
+                    Destroy(game.gameObject);
+                }
+                //Maybe timeScale reset here?
+                gameStarted = false;
+                failed = false;
             }
             else
             {
@@ -105,7 +112,7 @@ public class FullGameLogic : MonoBehaviour
 
         Time.timeScale = 0;
         //Create new game and add its camera to the list of cameras
-        GameObject newGame = Instantiate(miniGamePrefabs[currentGameIndex], new Vector3(0, (currentGameIndex + 1) * yDistanceBetweenGames, 0), Quaternion.identity, transform);
+        GameObject newGame = Instantiate(miniGamePrefabs[currentGameIndex], new Vector3(0, (currentGameIndex + 1) * yDistanceBetweenGames, 0), Quaternion.identity, miniGameHolder.transform);
 
         //Add the games camera to the list of cameras
         Camera gameCam = newGame.GetComponentInChildren<Camera>();
@@ -206,20 +213,25 @@ public class FullGameLogic : MonoBehaviour
         gameCameras.Add(growingCamera);
 
         //Deactive the main menu object when done transitioning only on the first game
-        if (currentGameIndex == 0) { StartScreenUI.SetActive(false); }
+        if (currentGameIndex == 0) { 
+            (firstGame ? StartScreenUI:RestartScreenUI).SetActive(false);
+            firstGame = false;
+        }
 
         //TODO: Add some trigger here to start some indication to the player that the game will be unfreezing soon, maybe change the WaitForSeconds below to a WaitUntil so that the timing is decoupled
-        StartCoroutine(ShowInstructions(instructionFadeInSeconds, instructionFadeOutSeconds));
-        yield return new WaitForSecondsRealtime(instructionFadeInSeconds + instructionFadeOutSeconds);
-
-
-        ////Wait and unfreeze game
-        //yield return new WaitForSecondsRealtime(secondsToWaitAfterTransition);
-        Time.timeScale = 1;
-        currentGameIndex++;
-        if (currentGameIndex < miniGamePrefabs.Count)
+        if (!failed)
         {
-            StartCoroutine(AddNextGame(timeBetweenGameAdds));
+            StartCoroutine(ShowInstructions(instructionFadeInSeconds, instructionFadeOutSeconds));
+            yield return new WaitForSecondsRealtime(instructionFadeInSeconds + instructionFadeOutSeconds);
+
+            ////Wait and unfreeze game
+            //yield return new WaitForSecondsRealtime(secondsToWaitAfterTransition);
+            Time.timeScale = 1;
+            currentGameIndex++;
+            if (currentGameIndex < miniGamePrefabs.Count)
+            {
+                StartCoroutine(AddNextGame(timeBetweenGameAdds));
+            }
         }
     }
 
@@ -238,7 +250,7 @@ public class FullGameLogic : MonoBehaviour
         //The first game is a special case since it uses the menu instead of other games
         if (currentGameIndex == 0)
         {
-            shrinkingCameras = new List<Camera>() { StartScreenUI.GetComponentInChildren<Camera>() };
+            shrinkingCameras = new List<Camera>() { (firstGame ? StartScreenUI : RestartScreenUI).GetComponentInChildren<Camera>() };
 
             startRect = new Rect(1f, 0f, 0f, 1f);
             finalGrowingRect = new Rect(0f, 0f, 1f, 1f);
@@ -290,5 +302,18 @@ public class FullGameLogic : MonoBehaviour
 
         failed = true;
         movingCameras = true;
+    }
+
+    private void GameSetup()
+    {
+        //TODO: This Shuffle parameter will be used more later when I add more configuration options to how people want to play the game
+        if (shuffleGames)
+        {
+            Utils.Shuffle(miniGamePrefabs);
+        }
+        gameCameras = new List<Camera>();
+        shrinkingCameras = new List<Camera>();
+        currentGameIndex = 0;
+        totalTimeSurvived = 0;
     }
 }
