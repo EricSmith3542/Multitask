@@ -1208,6 +1208,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b0bd5bb5aeb86a34da8b95e40014a801, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  spotLight: {fileID: 3545097954240283792}
+  lightTempDangerMin: 6900
+  lightTempDangerMax: 1500
+  lightIntensityMin: 400
+  lightIntensityMax: 1100
+  noDangerDistance: 2
   ball: {fileID: 3545097955955325934}
   rotationSpeedMultiplier: 0.1
 --- !u!1 &3545097955955325934
@@ -1565,7 +1571,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3545097956310781878}
-  - component: {fileID: 1297476339}
+  - component: {fileID: -8282158231972574841}
   m_Layer: 0
   m_Name: Balance Game Objects
   m_TagString: Balance Game
@@ -1592,9 +1598,9 @@ Transform:
   - {fileID: 3545097955066183917}
   - {fileID: 5369976176421678398}
   m_Father: {fileID: 0}
-  m_RootOrder: 3
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1297476339
+--- !u!114 &-8282158231972574841
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

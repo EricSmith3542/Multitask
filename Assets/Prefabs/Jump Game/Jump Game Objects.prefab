@@ -811,7 +811,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3165224745895249064}
-  - component: {fileID: 8145841599744813414}
+  - component: {fileID: 2035221164996612395}
   m_Layer: 0
   m_Name: Jump Game Objects
   m_TagString: Jump Game
@@ -838,9 +838,9 @@ Transform:
   - {fileID: 3165224745476350983}
   - {fileID: 3608264295930473379}
   m_Father: {fileID: 0}
-  m_RootOrder: 1
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &8145841599744813414
+--- !u!114 &2035221164996612395
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

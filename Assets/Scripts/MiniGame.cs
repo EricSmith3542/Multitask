@@ -6,18 +6,21 @@ using UnityEngine.Rendering.HighDefinition;
 public abstract class MiniGame : MonoBehaviour
 {
     [Header("Danger Indicator Controls")]
-    [SerializeField]
-    public Light spotLight;
+    [SerializeField] private Light spotLight;
+    [SerializeField] public float lightTempDangerMin = 6900;
+    [SerializeField] public float lightTempDangerMax = 1500;
+    [SerializeField] public float lightIntensityMin = 400;
+    [SerializeField] public float lightIntensityMax = 1100;
+    [SerializeField] public float noDangerDistance = 2f;
+
     private HDAdditionalLightData hdSpotLight;
-    public float lightTempDangerMin = 6900;
-    public float lightTempDangerMax = 1500;
-    public float lightIntensityMin = 400;
-    public float lightIntensityMax = 1100;
-    public float noDangerDistance = 2f;
+    private FullGameLogic gameController;
+
     // Start is called before the first frame update
     public virtual void Start()
     {
         hdSpotLight = spotLight.GetComponent<HDAdditionalLightData>();
+        gameController = GameObject.FindGameObjectWithTag("GameController").GetComponent<FullGameLogic>();
     }
 
     // Update is called once per frame
@@ -35,4 +38,13 @@ public abstract class MiniGame : MonoBehaviour
     }
 
     public abstract Vector2 DetectDanger();
+
+    public void EndGame()
+    {
+        Time.timeScale = 0;
+
+        //add some screen shatter/sound effects here or some indication of which game failed
+
+        gameController.FailToRestartScreen();
+    }
 }

@@ -7,6 +7,7 @@ public class FullGameLogic : MonoBehaviour
 {
     [Header("UI Components")]
     [SerializeField] private GameObject StartScreenUI;
+    [SerializeField] private GameObject RestartScreenUI;
     [SerializeField] private TMP_Text timerText;
 
     [Header("Games")]
@@ -16,7 +17,6 @@ public class FullGameLogic : MonoBehaviour
     [Header("Game Logic Settings")]
     [SerializeField] private float timeBetweenGameAdds = 15f;
     [SerializeField] private float cameraTransitionSpeed = 1f;
-    [SerializeField] private float secondsToWaitAfterTransition = 2f;
     [SerializeField] private float viewPortSnapFinishRange = .01f;
     [SerializeField] private float instructionFadeInSeconds = 1f, instructionFadeOutSeconds = 1f;
     [SerializeField] private bool shuffleGames = true;
@@ -39,6 +39,7 @@ public class FullGameLogic : MonoBehaviour
     private Rect finalShrinkingRect;
     private bool growHorizontal;
     private bool movingCameras = false;
+    private bool failed = false;
 
 
     //Jank Jumpgame fix variables
@@ -127,9 +128,9 @@ public class FullGameLogic : MonoBehaviour
         {
             Camera shrinkingCamera = shrinkingCameras[i];
 
-            //This is essentially: "If we are looking at the thrid game added while adding the forth game, slide the camera to the left"
+            //This is essentially: "If we failed or are looking at the thrid game added while adding the forth game, slide the camera to the left"
             float shrinkingX = shrinkingCamera.rect.x;
-            if (shrinkingCamera.rect.x != 0f && !(shrinkingCamera.rect.x >= .5f))
+            if (failed || (shrinkingCamera.rect.x != 0f && !(shrinkingCamera.rect.x >= .5f)))
             {
                 shrinkingX = Mathf.LerpUnclamped(shrinkingCamera.rect.x, 0f, Time.unscaledDeltaTime * cameraTransitionSpeed);
             }
@@ -138,7 +139,7 @@ public class FullGameLogic : MonoBehaviour
             float shrinkingWidth = Mathf.LerpUnclamped(shrinkingCamera.rect.width, finalShrinkingRect.width, Time.unscaledDeltaTime * cameraTransitionSpeed);
             float shrinkingHeight = Mathf.LerpUnclamped(shrinkingCamera.rect.height, finalShrinkingRect.height, Time.unscaledDeltaTime * cameraTransitionSpeed);
             
-            shrinkingCamera.rect = new Rect(shrinkingX, growHorizontal ? shrinkingCamera.rect.y:shrinkingY, shrinkingWidth, shrinkingHeight);
+            shrinkingCamera.rect = new Rect(shrinkingX, (growHorizontal || failed) ? shrinkingCamera.rect.y:shrinkingY, shrinkingWidth, shrinkingHeight);
         }
 
         //Jank Jump Game Camera fix
@@ -274,5 +275,20 @@ public class FullGameLogic : MonoBehaviour
     bool isViewportNearTargetSize(Rect rect1, Rect rect2)
     {
         return (rect1.width >= rect2.width - viewPortSnapFinishRange) && (rect1.height >= rect2.height - viewPortSnapFinishRange);
+    }
+
+    public void FailToRestartScreen()
+    {
+        growingCamera = RestartScreenUI.GetComponentInChildren<Camera>();
+        growingCamera.rect = new Rect(1f, 0f, 0f, 1f);
+        finalGrowingRect = new Rect(0f, 0f, 1f, 1f);
+
+        shrinkingCameras = gameCameras;
+        finalShrinkingRect = new Rect(0f, 0f, 0f, shrinkingCameras[0].rect.height);
+
+        RestartScreenUI.SetActive(true);
+
+        failed = true;
+        movingCameras = true;
     }
 }

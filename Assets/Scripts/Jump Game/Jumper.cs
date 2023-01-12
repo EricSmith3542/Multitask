@@ -12,6 +12,7 @@ public class Jumper : MiniGame
 
     private InputAction Jump;
     private Rigidbody rb;
+    private bool failed = false;
 
 
     [Header("Jump Settings")]
@@ -48,9 +49,11 @@ public class Jumper : MiniGame
 
     private void OnTriggerEnter(Collider other)
     {
-        if(other.tag == OBSTACLE_TAG)
+        if(other.tag == OBSTACLE_TAG && !failed)
         {
-            controller.fail();
+            Debug.Log("Jump Fail");
+            failed = true;
+            EndGame();
         }
     }
 

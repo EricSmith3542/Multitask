@@ -12,7 +12,7 @@ public class UpDown : MiniGame
     private InputAction Move;
     private Transform gameCenter;
     private float initialZ;
-    private bool gameFailed = false;
+    private bool failed = false;
 
     public float moveSpeedMultiplier = .5f;
     public float maxHeight = 3.65f;
@@ -52,10 +52,11 @@ public class UpDown : MiniGame
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.tag.Equals(OBSTACLE_TAG))
+        if (other.tag.Equals(OBSTACLE_TAG) && !failed)
         {
             Debug.Log("UpDown FAILED");
-            gameFailed = true;
+            failed = true;
+            EndGame();
         }
     }
 
