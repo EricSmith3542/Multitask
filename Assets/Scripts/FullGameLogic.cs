@@ -6,40 +6,39 @@ using TMPro;
 public class FullGameLogic : MonoBehaviour
 {
     [Header("UI Components")]
-    [SerializeField]
-    private GameObject StartScreenUI;
-    [SerializeField]
-    private TMP_Text timerText;
-    private float totalTime = 0f;
+    [SerializeField] private GameObject StartScreenUI;
+    [SerializeField] private TMP_Text timerText;
 
     [Header("Games")]
-    [SerializeField]
-    private List<GameObject> miniGamePrefabs;
-    private List<Camera> gameCameras;
+    [SerializeField] private List<GameObject> miniGamePrefabs;
+    
 
     [Header("Game Logic Settings")]
-    [SerializeField]
-    private float timeBetweenGameAdds = 15f;
-    [SerializeField]
-    private float cameraTransitionSpeed = 1f;
-    [SerializeField]
-    private float secondsToWaitAfterTransition = 2f;
-    [SerializeField]
-    private float viewPortSnapFinishRange = .01f;
-    [SerializeField]
-    private bool shuffle = true;
+    [SerializeField] private float timeBetweenGameAdds = 15f;
+    [SerializeField] private float cameraTransitionSpeed = 1f;
+    [SerializeField] private float secondsToWaitAfterTransition = 2f;
+    [SerializeField] private float viewPortSnapFinishRange = .01f;
+    [SerializeField] private float instructionFadeInSeconds = 1f, instructionFadeOutSeconds = 1f;
+    [SerializeField] private bool shuffleGames = true;
 
+    private float totalTimeSurvived = 0f;
     private bool gameStarted = false;
-    private bool movingCameras = false;
-
+    
+    //Index of the next game to be instansiated from the miniGamePrefabs list
     private int currentGameIndex = 0;
+
+    //Spacing between games as they are instansiated
     private float yDistanceBetweenGames = 50f;
 
+    //Camera Transition Variables
+    private List<Camera> gameCameras;
     private List<Camera> shrinkingCameras;
     private Camera growingCamera;
+    private InstructionFade currentGameInstructionFader;
     private Rect finalGrowingRect;
     private Rect finalShrinkingRect;
     private bool growHorizontal;
+    private bool movingCameras = false;
 
 
     //Jank Jumpgame fix variables
@@ -53,7 +52,7 @@ public class FullGameLogic : MonoBehaviour
     void Start()
     {
         //TODO: This Shuffle parameter will be used more later when I add more configuration options to how people want to play the game
-        if (shuffle)
+        if (shuffleGames)
         {
             Utils.Shuffle(miniGamePrefabs);
         }
@@ -91,8 +90,8 @@ public class FullGameLogic : MonoBehaviour
             }
             else
             {
-                totalTime += Time.deltaTime;
-                timerText.text = totalTime.ToString("0.0");
+                totalTimeSurvived += Time.deltaTime;
+                timerText.text = totalTimeSurvived.ToString("0.0");
             }
         }
 
@@ -109,6 +108,7 @@ public class FullGameLogic : MonoBehaviour
 
         //Add the games camera to the list of cameras
         Camera gameCam = newGame.GetComponentInChildren<Camera>();
+        currentGameInstructionFader = newGame.GetComponent<InstructionFade>();
         growingCamera = gameCam;
         
         TransitionCameras();
@@ -169,50 +169,64 @@ public class FullGameLogic : MonoBehaviour
         {
             movingCameras = false;
 
-            //Set the viewports to be exactly the correct size
-            growingCamera.rect = new Rect(finalGrowingRect);
-
-            foreach(Camera shrinkingCamera in shrinkingCameras)
-            {
-                float targetX = shrinkingCamera.rect.x;
-                if (targetX != 0f && targetX != .5f)
-                {
-                    targetX = 0f;
-                }
-                shrinkingCamera.rect = new Rect(targetX, growHorizontal ? shrinkingCamera.rect.y:finalShrinkingRect.y, finalShrinkingRect.width, finalShrinkingRect.height);
-            }
-
-            if (jumpGameCameraShiftNeeded && currentGameIndex >= 1)
-            {
-                jumpGameCamera.transform.position = new Vector3(JUMP_CAM_SHIFT, jumpGameCamera.transform.position.y, jumpGameCamera.transform.position.z);
-                jumpGameCameraShiftNeeded = false;
-                jumpGameUnshift = true;
-            }
-            else if (jumpGameUnshift)
-            {
-                jumpGameCamera.transform.position = new Vector3(0f, jumpGameCamera.transform.position.y, jumpGameCamera.transform.position.z);
-                jumpGameUnshift = false;
-            }
-            
-
-            //Add the camera to the list of cameras for the next transition
-            gameCameras.Add(growingCamera);
-
-            //TODO: Add some trigger here to start some indication to the player that the game will be unfreezing soon, maybe change the WaitForSeconds below to a WaitUntil so that the timing is decoupled
-
-
-            //Deactive the main menu object when done transitioning only on the first game
-            if (currentGameIndex == 0) { StartScreenUI.SetActive(false); }
-
-            ////Wait and unfreeze game
-            //yield return new WaitForSecondsRealtime(secondsToWaitAfterTransition);
-            Time.timeScale = 1;
-            currentGameIndex++;
-            if(currentGameIndex < miniGamePrefabs.Count)
-            {
-                StartCoroutine(AddNextGame(timeBetweenGameAdds));
-            }
+            StartCoroutine(FinalizeCameraTransition());
         }
+    }
+
+    IEnumerator FinalizeCameraTransition()
+    {
+        //Set the viewports to be exactly the correct size
+        growingCamera.rect = new Rect(finalGrowingRect);
+
+        foreach (Camera shrinkingCamera in shrinkingCameras)
+        {
+            float targetX = shrinkingCamera.rect.x;
+            if (targetX != 0f && targetX != .5f)
+            {
+                targetX = 0f;
+            }
+            shrinkingCamera.rect = new Rect(targetX, growHorizontal ? shrinkingCamera.rect.y : finalShrinkingRect.y, finalShrinkingRect.width, finalShrinkingRect.height);
+        }
+
+        if (jumpGameCameraShiftNeeded && currentGameIndex >= 1)
+        {
+            jumpGameCamera.transform.position = new Vector3(JUMP_CAM_SHIFT, jumpGameCamera.transform.position.y, jumpGameCamera.transform.position.z);
+            jumpGameCameraShiftNeeded = false;
+            jumpGameUnshift = true;
+        }
+        else if (jumpGameUnshift)
+        {
+            jumpGameCamera.transform.position = new Vector3(0f, jumpGameCamera.transform.position.y, jumpGameCamera.transform.position.z);
+            jumpGameUnshift = false;
+        }
+
+
+        //Add the camera to the list of cameras for the next transition
+        gameCameras.Add(growingCamera);
+
+        //Deactive the main menu object when done transitioning only on the first game
+        if (currentGameIndex == 0) { StartScreenUI.SetActive(false); }
+
+        //TODO: Add some trigger here to start some indication to the player that the game will be unfreezing soon, maybe change the WaitForSeconds below to a WaitUntil so that the timing is decoupled
+        StartCoroutine(ShowInstructions(instructionFadeInSeconds, instructionFadeOutSeconds));
+        yield return new WaitForSecondsRealtime(instructionFadeInSeconds + instructionFadeOutSeconds);
+
+
+        ////Wait and unfreeze game
+        //yield return new WaitForSecondsRealtime(secondsToWaitAfterTransition);
+        Time.timeScale = 1;
+        currentGameIndex++;
+        if (currentGameIndex < miniGamePrefabs.Count)
+        {
+            StartCoroutine(AddNextGame(timeBetweenGameAdds));
+        }
+    }
+
+    IEnumerator ShowInstructions(float fadeInSecs, float fadeOutSecs)
+    {
+        currentGameInstructionFader.StartFadeIn(fadeInSecs);
+        yield return new WaitForSecondsRealtime(fadeInSecs);
+        currentGameInstructionFader.StartFadeOut(fadeOutSecs);
     }
 
     void TransitionCameras()
