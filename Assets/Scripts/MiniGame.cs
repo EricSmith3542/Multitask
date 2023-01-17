@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering.HighDefinition;
+using UnityEngine.SceneManagement;
 
 public abstract class MiniGame : MonoBehaviour
 {
@@ -20,7 +21,10 @@ public abstract class MiniGame : MonoBehaviour
     public virtual void Start()
     {
         hdSpotLight = spotLight.GetComponent<HDAdditionalLightData>();
-        gameController = GameObject.FindGameObjectWithTag("GameController").GetComponent<FullGameLogic>();
+        if(SceneManager.GetActiveScene().name == "Full Game Loop")
+        {
+            gameController = GameObject.FindGameObjectWithTag("GameController").GetComponent<FullGameLogic>();
+        }
     }
 
     // Update is called once per frame
@@ -28,8 +32,8 @@ public abstract class MiniGame : MonoBehaviour
     {
         //Change the spotlight Temp and Intensity based on the (temp, intensity) vector returned from the DetectDanger method
         Vector2 tempAndIntensity = DetectDanger();
-        spotLight.colorTemperature = tempAndIntensity.x;
-        hdSpotLight.intensity = tempAndIntensity.y;
+        spotLight.colorTemperature = Mathf.Lerp(spotLight.colorTemperature, tempAndIntensity.x, Time.deltaTime * 5f);
+        hdSpotLight.intensity = Mathf.Lerp(hdSpotLight.intensity, tempAndIntensity.y, Time.deltaTime * 5f);
     }
 
     public HDAdditionalLightData getHDLight()
@@ -41,10 +45,7 @@ public abstract class MiniGame : MonoBehaviour
 
     public void EndGame()
     {
-        Time.timeScale = 0;
-
         //add some screen shatter/sound effects here or some indication of which game failed
-
         gameController.FailToRestartScreen();
     }
 }

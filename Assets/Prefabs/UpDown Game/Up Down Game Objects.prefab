@@ -223,7 +223,7 @@ CanvasGroup:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 482711228}
   m_Enabled: 1
-  m_Alpha: 1
+  m_Alpha: 0
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
@@ -1041,7 +1041,7 @@ Transform:
   - {fileID: 1503744424699859785}
   - {fileID: 485623700489560441}
   m_Father: {fileID: 0}
-  m_RootOrder: 0
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &-5252138508195197573
 MonoBehaviour:
@@ -1144,7 +1144,7 @@ Light:
   m_LightShadowCasterMode: 2
   m_AreaSize: {x: 0.5, y: 0.5}
   m_BounceIntensity: 1
-  m_ColorTemperature: 6916
+  m_ColorTemperature: 20000
   m_UseColorTemperature: 1
   m_BoundingSphereOverride: {x: 1.6258649e+25, y: 4.8554528e+33, z: 2.8168867e+20, w: 1.0899303e+27}
   m_UseBoundingSphereOverride: 0
@@ -1316,7 +1316,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1503744425300190143}
-  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+  m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!23 &1503744425300190130
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -1337,7 +1337,7 @@ MeshRenderer:
   m_RenderingLayerMask: 257
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: -876546973899608171, guid: 6b81f3065ee6c5a4b955c679804fa95e, type: 3}
+  - {fileID: 2100000, guid: f76970bd649de0f44945e3eea886e7dd, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1393,7 +1393,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   spotLight: {fileID: 1503744424853298942}
-  lightTempDangerMin: 6900
+  lightTempDangerMin: 20000
   lightTempDangerMax: 1500
   lightIntensityMin: 400
   lightIntensityMax: 1100
@@ -1405,7 +1405,7 @@ MonoBehaviour:
   rotateZ: 0.1
   gameCamera: {fileID: 1503744424234921904}
   obstacle: {fileID: 4927272557024709265, guid: f0205ddac247b554595a02efc578cece, type: 3}
-  spawnPointPadding: 5
+  spawnPointPadding: 10
   spawnFuzziness: 1
   secondsBetweenSpawns: 5
   obstacleSpeed: 0.75
@@ -1669,12 +1669,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_UiScaleMode: 0
+  m_UiScaleMode: 1
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
   m_ReferenceResolution: {x: 800, y: 600}
   m_ScreenMatchMode: 0
-  m_MatchWidthOrHeight: 0
+  m_MatchWidthOrHeight: 1
   m_PhysicalUnit: 3
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96

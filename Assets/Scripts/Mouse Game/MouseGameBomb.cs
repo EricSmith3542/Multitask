@@ -50,7 +50,6 @@ public class MouseGameBomb : MonoBehaviour
     {
         yield return new WaitForSeconds(lifeTime);
         Debug.Log("MOUSE GAME FAIL");
-        Time.timeScale = 0;
         GameObject.FindGameObjectWithTag("GameController").GetComponent<FullGameLogic>().FailToRestartScreen();
     }
 

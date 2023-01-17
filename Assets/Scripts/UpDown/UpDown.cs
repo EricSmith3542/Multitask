@@ -63,18 +63,21 @@ public class UpDown : MiniGame
     IEnumerator Spawning()
     {
         yield return new WaitForSeconds(secondsBetweenSpawns);
+
+        float cameraRatio = gameCamera.rect.width / gameCamera.rect.height;
         int randomDirection = (Random.Range(0, 2) * 2 - 1);
-        Vector3 spawnPoint = new Vector3(spawnPointPadding * randomDirection, transform.localPosition.y + Random.Range(-spawnFuzziness, spawnFuzziness), initialZ) + gameCenter.position;
+        Vector3 spawnPoint = new Vector3(spawnPointPadding * randomDirection * cameraRatio, transform.localPosition.y + Random.Range(-spawnFuzziness, spawnFuzziness), initialZ) + gameCenter.position;
         GameObject spawned = Instantiate(obstacle, spawnPoint, gameCenter.localRotation, gameCenter);
         UpDownObstacle ob = spawned.GetComponent<UpDownObstacle>();
-        ob.setDeleteDistance((spawnPointPadding + 1) * randomDirection);
+        ob.setDeleteDistance(((spawnPointPadding * cameraRatio) + 1) * randomDirection);
         ob.setSpeed(obstacleSpeed);
+
         StartCoroutine(Spawning());
     }
 
     void MoveCube()
     {
-        Vector3 newPosition = transform.localPosition + new Vector3(transform.localPosition.x, Move.ReadValue<float>() * moveSpeedMultiplier, transform.localPosition.z);
+        Vector3 newPosition = transform.localPosition + new Vector3(transform.localPosition.x, Move.ReadValue<float>() * moveSpeedMultiplier * Time.timeScale, transform.localPosition.z);
         if (Mathf.Abs(newPosition.y) >= maxHeight)
         {
             transform.localPosition = new Vector3(transform.localPosition.x, maxHeight * (newPosition.y / Mathf.Abs(newPosition.y)), transform.localPosition.z);

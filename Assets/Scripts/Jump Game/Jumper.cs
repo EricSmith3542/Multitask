@@ -12,6 +12,7 @@ public class Jumper : MiniGame
 
     private InputAction Jump;
     private Rigidbody rb;
+    private Collider collider;
     private bool failed = false;
 
 
@@ -30,6 +31,7 @@ public class Jumper : MiniGame
         maxJumpHeight = transform.position.y + maxJumpHeight;
         Jump = GetComponent<PlayerInput>().actions["Jump"];
         rb = GetComponent<Rigidbody>();
+        collider = GetComponent<Collider>();
     }
 
     new void Update()
@@ -60,18 +62,35 @@ public class Jumper : MiniGame
     public override Vector2 DetectDanger()
     {
         float closestDistance = 9999f;
-        foreach (GameObject spawnedObstacle in GameObject.FindGameObjectsWithTag(OBSTACLE_TAG))
+        GameObject[] obstacles = GameObject.FindGameObjectsWithTag(OBSTACLE_TAG);
+        if(obstacles.Length > 0)
         {
-            float dist = Vector3.Distance(transform.position, spawnedObstacle.GetComponent<Collider>().ClosestPoint(transform.position));
-            if (dist < closestDistance)
+            GameObject closestObstacle = obstacles[0];
+            foreach (GameObject spawnedObstacle in obstacles)
             {
-                closestDistance = dist;
+                float dist = Vector3.Distance(transform.position, spawnedObstacle.GetComponent<Collider>().ClosestPoint(transform.position));
+                if (dist < closestDistance)
+                {
+                    closestDistance = dist;
+                    closestObstacle = spawnedObstacle;
+                }
+            }
+
+
+            Bounds realBounds = closestObstacle.GetComponent<Collider>().bounds;
+            Bounds obstacleBoundsStretched = new Bounds(realBounds.center, realBounds.size);
+            obstacleBoundsStretched.Encapsulate(new Vector3(transform.position.x, closestObstacle.transform.position.y, transform.position.z));
+
+            if (obstacleBoundsStretched.Intersects(collider.bounds))
+            {
+                float newTemp = Utils.MapFloat(Mathf.Min(closestDistance, noDangerDistance), noDangerDistance, 0, lightTempDangerMin, lightTempDangerMax);
+                float newIntensity = Utils.MapFloat(Mathf.Min(closestDistance, noDangerDistance), noDangerDistance, 0, lightIntensityMin, lightIntensityMax);
+
+                return new Vector2(newTemp, newIntensity);
             }
         }
-        float newTemp = Utils.MapFloat(Mathf.Min(closestDistance, noDangerDistance), noDangerDistance, 0, lightTempDangerMin, lightTempDangerMax);
-        float newIntensity = Utils.MapFloat(Mathf.Min(closestDistance, noDangerDistance), noDangerDistance, 0, lightIntensityMin, lightIntensityMax);
-
-        return new Vector2(newTemp, newIntensity);
+        return new Vector2(lightTempDangerMin, lightIntensityMin);
+        
     }
 
     private void JumpIfJumping()

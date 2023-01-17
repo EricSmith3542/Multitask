@@ -4,6 +4,10 @@ using UnityEngine;
 
 public class JumpGameController : MonoBehaviour
 {
+    [Header("Camera")]
+    [SerializeField]
+    private Camera gameCamera;
+
     [Header("Prefabs")]
     [SerializeField]
     private GameObject floorAndWall;
@@ -11,34 +15,33 @@ public class JumpGameController : MonoBehaviour
     private GameObject obstacle;
 
     [Header("Game Controls")]
-    public float gameSpeed = 1f;
-    public float secondsPerObstacle = 1f;
-    public float bottomSpawnYPadding = .5f;
-    public float topSpawnYPadding = 3.5f;
-    public float middleSpawnYPadding = 1.5f;
+    [SerializeField] private float gameSpeed = 1f;
+    [SerializeField] private float secondsPerObstacle = 1f;
+    [SerializeField] private float bottomSpawnYPadding = .5f;
+    [SerializeField] private float topSpawnYPadding = 3.5f;
+    [SerializeField] private float middleSpawnYPadding = 1.5f;
+    [SerializeField] private float horizontalSpawnPadding = 10f;
+    [Range(0,1)]
+    [SerializeField] private float doubleObstacleChance = .1f;
 
 
-    private Vector3 gameSpeedVector, bottomVector, topVector, middleVector;
-    private float secondsBetweenSpawns;
+    private Vector3 gameSpeedVector;
     private float obstacleTimer;
+    private float initialZ;
+    private Transform gameCenter;
 
     // Start is called before the first frame update
     void Start()
     {
-        //TODO: This is mega jank, fix later lol
-        secondsBetweenSpawns = (floorAndWall.GetComponent<Transform>().GetChild(0).GetComponent<Transform>().localScale.x * 10 / gameSpeed) - .05f;
-        obstacleTimer = secondsPerObstacle;
         gameSpeedVector = new Vector3(-gameSpeed, 0, 0);
-        bottomVector = Vector3.up * bottomSpawnYPadding;
-        topVector = Vector3.up * topSpawnYPadding;
-        middleVector = Vector3.up * middleSpawnYPadding;
-
+        initialZ = transform.position.z;
+        gameCenter = transform.parent;
     }
 
     // Update is called once per frame
     void FixedUpdate()
     {
-        if(obstacleTimer <= 0)
+        if (obstacleTimer <= 0)
         {
             SpawnObstacle();
             obstacleTimer = secondsPerObstacle;
@@ -49,26 +52,37 @@ public class JumpGameController : MonoBehaviour
         }
     }
 
-    void SpawnFloor()
-    {
-        GameObject spawnedFloor = Instantiate(floorAndWall, transform.position, Quaternion.identity, transform);
-        spawnedFloor.GetComponent<Rigidbody>().velocity = gameSpeedVector;
-    }
-
     void SpawnObstacle()
     {
-        Vector3 spawnPos = transform.position + topVector;
+        float spawnHeight = topSpawnYPadding;
+        float otherHeight1 = bottomSpawnYPadding;
+        float otherHeight2 = middleSpawnYPadding;
         int rand = Random.Range(0, 3);
         if (rand == 0)
         {
-            spawnPos = transform.position + bottomVector;
+            spawnHeight = bottomSpawnYPadding;
+            otherHeight1 = topSpawnYPadding;
+            otherHeight2 = middleSpawnYPadding;
         }
-        else if(rand == 1)
+        else if (rand == 1)
         {
-            spawnPos = transform.position + middleVector;
+            spawnHeight = middleSpawnYPadding;
+            otherHeight1 = topSpawnYPadding;
+            otherHeight2 = bottomSpawnYPadding;
         }
-        GameObject spawnedObstacle = Instantiate(obstacle, spawnPos, Quaternion.identity, transform);
+
+        float cameraRatio = gameCamera.rect.width / gameCamera.rect.height;
+        Vector3 spawnPoint = new Vector3(horizontalSpawnPadding * cameraRatio, spawnHeight, initialZ) + gameCenter.position;
+        GameObject spawnedObstacle = Instantiate(obstacle, spawnPoint, Quaternion.identity, transform);
         spawnedObstacle.GetComponent<Rigidbody>().velocity = gameSpeedVector;
+
+        if(doubleObstacleChance >= Random.Range(0f, 1f))
+        {
+            spawnHeight = Random.Range(0f, 1f) > .5f ? otherHeight1 : otherHeight2;
+            spawnPoint = new Vector3(horizontalSpawnPadding * cameraRatio, spawnHeight, initialZ) + gameCenter.position;
+            spawnedObstacle = Instantiate(obstacle, spawnPoint, Quaternion.identity, transform);
+            spawnedObstacle.GetComponent<Rigidbody>().velocity = gameSpeedVector;
+        }
     }
 
 }

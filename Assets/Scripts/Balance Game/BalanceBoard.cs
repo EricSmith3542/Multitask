@@ -17,7 +17,9 @@ public class BalanceBoard : MiniGame
     private GameObject ball;
 
     [Range(0.01f, 1)]
-    public float rotationSpeedMultiplier = .5f;
+    [SerializeField] private float rotationSpeedMultiplier = .5f;
+    [SerializeField] private float maxAngularVelocity = 1f;
+    private float currentSpeedMultiplier = 0f;
 
     // Start is called before the first frame update
     new void Start()
@@ -25,6 +27,7 @@ public class BalanceBoard : MiniGame
         base.Start();
         Tilt = GetComponent<PlayerInput>().actions["Tilt"];
         Rigidbody = GetComponent<Rigidbody>();
+        Rigidbody.maxAngularVelocity = maxAngularVelocity;
     }
 
     new private void Update()
@@ -37,10 +40,18 @@ public class BalanceBoard : MiniGame
         }
     }
 
-    // Update is called once per frame
     void FixedUpdate()
     {
-        Rigidbody.AddTorque(new Vector3(0, 0, Tilt.ReadValue<float>() * rotationSpeedMultiplier), ForceMode.VelocityChange);
+        if(Tilt.ReadValue<float>() == 0)
+        {
+            currentSpeedMultiplier = Mathf.Max(Mathf.Lerp(currentSpeedMultiplier, 0, Time.deltaTime), 0);
+        }
+        else
+        {
+            currentSpeedMultiplier += Mathf.Min(Mathf.Lerp(currentSpeedMultiplier, rotationSpeedMultiplier, Time.deltaTime), rotationSpeedMultiplier);
+        }
+
+        Rigidbody.AddTorque(new Vector3(0, 0, Tilt.ReadValue<float>() * currentSpeedMultiplier), ForceMode.VelocityChange);
     }
 
     //This is the result of bad design on my end. I didnt fully think about how I was going to structure the DangerDetection until after the creation of this minigame

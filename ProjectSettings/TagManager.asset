@@ -11,6 +11,7 @@ TagManager:
   - Jump Game
   - Mouse Game
   - UpDown Game
+  - Bomb Holder
   layers:
   - Default
   - TransparentFX

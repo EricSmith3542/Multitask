@@ -13,7 +13,7 @@ public class FullGameLogic : MonoBehaviour
     [Header("Games")]
     [SerializeField] private GameObject miniGameHolder;
     [SerializeField] private List<GameObject> miniGamePrefabs;
-    
+
     [Header("Game Logic Settings")]
     [SerializeField] private float timeBetweenGameAdds = 15f;
     [SerializeField] private float cameraTransitionSpeed = 1f;
@@ -21,8 +21,12 @@ public class FullGameLogic : MonoBehaviour
     [SerializeField] private float instructionFadeInSeconds = 1f, instructionFadeOutSeconds = 1f;
     [SerializeField] private bool shuffleGames = true;
 
+    [Header("Debugging")]
+    [SerializeField] private bool debugNoFail = false;
+
     private float totalTimeSurvived = 0f;
     private bool gameStarted = false;
+    private bool waitForNoInput = false;
     
     //Index of the next game to be instansiated from the miniGamePrefabs list
     private int currentGameIndex = 0;
@@ -50,60 +54,61 @@ public class FullGameLogic : MonoBehaviour
     private int jumpGameCameraIndex = 0;
     private Camera jumpGameCamera = null;
 
+    //Mouse Game Fix Variables
+    private bool mouseGameBombClean = false;
+
     // Start is called before the first frame update
     void Start()
     {
         GameSetup();
-
-        //The jump game is the only game where the camera isnt centered on the controllable piece, so when the viewport ratio isn't 1:1, the camera needs to be shifted to keep the jumper on the screen
-        //TODO: Assess a better fix to this
-        if (miniGamePrefabs[0].tag.Equals("Jump Game") || miniGamePrefabs[1].tag.Equals("Jump Game"))
-        {
-            jumpGameCameraShiftNeeded = true;
-            if(miniGamePrefabs[1].tag.Equals("Jump Game"))
-            {
-                jumpGameCameraIndex = 1;
-            }
-        }
     }
 
     // Update is called once per frame
     void Update()
     {
-
-        if (!gameStarted)
+        if (waitForNoInput)
         {
-            if (Input.anyKey)
-            {
-                gameStarted = true;
-                failed = false;
-                StartCoroutine(AddNextGame(0));
-            }
-        }
-        else
-        {
+            waitForNoInput = Input.anyKey;
             if (movingCameras)
             {
                 AdjustViewports();
             }
-            else if(failed){
-                GameSetup();
-                foreach (Transform game in miniGameHolder.transform)
+        }
+        else
+        {
+            if (!gameStarted)
+            {
+                if (Input.anyKey)
                 {
-                    Destroy(game.gameObject);
+                    gameStarted = true;
+                    failed = false;
+                    StartCoroutine(AddNextGame(0));
                 }
-                //Maybe timeScale reset here?
-                gameStarted = false;
-                failed = false;
             }
             else
             {
-                totalTimeSurvived += Time.deltaTime;
-                timerText.text = totalTimeSurvived.ToString("0.0");
+                if (movingCameras)
+                {
+                    AdjustViewports();
+                }
+                else if (failed)
+                {
+                    GameSetup();
+                    foreach (Transform game in miniGameHolder.transform)
+                    {
+                        Destroy(game.gameObject);
+                    }
+                    //Maybe timeScale reset here?
+                    gameStarted = false;
+                    failed = false;
+                }
+                else
+                {
+                    totalTimeSurvived += Time.deltaTime;
+                    timerText.text = totalTimeSurvived.ToString("0.0");
+                }
             }
         }
-
-        
     }
 
     IEnumerator AddNextGame(float secondsUntilNextGame)
@@ -208,6 +213,29 @@ public class FullGameLogic : MonoBehaviour
             jumpGameUnshift = false;
         }
 
+        if (mouseGameBombClean && currentGameIndex >= 1)
+        {
+            GameObject mouseGame = GameObject.FindGameObjectWithTag("Mouse Game");
+            Camera mouseGameCamera = mouseGame.GetComponentInChildren<Camera>();
+            Plane[] cameraPlanes = GeometryUtility.CalculateFrustumPlanes(mouseGameCamera);
+
+            foreach (Transform t in mouseGame.transform)
+            {
+                if(t.tag.Equals("Bomb Holder"))
+                {
+                    foreach (Transform bomb in t)
+                    {
+                        //Remove any bomb that isnt in the camera any more
+                        if(!GeometryUtility.TestPlanesAABB(cameraPlanes, bomb.GetComponent<Collider>().bounds))
+                        {
+                            Destroy(bomb.gameObject);
+                        }
+                    }
+                }
+            }
+            mouseGameBombClean = false;
+        }
+
 
         //Add the camera to the list of cameras for the next transition
         gameCameras.Add(growingCamera);
@@ -291,17 +319,24 @@ public class FullGameLogic : MonoBehaviour
 
     public void FailToRestartScreen()
     {
-        growingCamera = RestartScreenUI.GetComponentInChildren<Camera>();
-        growingCamera.rect = new Rect(1f, 0f, 0f, 1f);
-        finalGrowingRect = new Rect(0f, 0f, 1f, 1f);
+        if (!debugNoFail)
+        {
+            StopAllCoroutines();
+            //StopCoroutine("AddNextGame");
+            waitForNoInput = true;
+            Time.timeScale = 0;
+            growingCamera = RestartScreenUI.GetComponentInChildren<Camera>();
+            growingCamera.rect = new Rect(1f, 0f, 0f, 1f);
+            finalGrowingRect = new Rect(0f, 0f, 1f, 1f);
 
-        shrinkingCameras = gameCameras;
-        finalShrinkingRect = new Rect(0f, 0f, 0f, shrinkingCameras[0].rect.height);
+            shrinkingCameras = gameCameras;
+            finalShrinkingRect = new Rect(0f, 0f, 0f, shrinkingCameras[0].rect.height);
 
-        RestartScreenUI.SetActive(true);
+            RestartScreenUI.SetActive(true);
 
-        failed = true;
-        movingCameras = true;
+            failed = true;
+            movingCameras = true;
+        }
     }
 
     private void GameSetup()
@@ -311,9 +346,42 @@ public class FullGameLogic : MonoBehaviour
         {
             Utils.Shuffle(miniGamePrefabs);
         }
+
+        //The jump game is the only game where the camera isnt centered on the controllable piece, so when the viewport ratio isn't 1:1, the camera needs to be shifted to keep the jumper on the screen
+        JumpGameCheck();
+        MouseGameCheck();
+
         gameCameras = new List<Camera>();
         shrinkingCameras = new List<Camera>();
         currentGameIndex = 0;
         totalTimeSurvived = 0;
+        jumpGameCamera = null;
+        jumpGameUnshift = false;
+    }
+
+    void JumpGameCheck()
+    {
+        //TODO: Assess a better fix to this
+        if (miniGamePrefabs[0].tag.Equals("Jump Game") || miniGamePrefabs[1].tag.Equals("Jump Game"))
+        {
+            jumpGameCameraShiftNeeded = true;
+            if (miniGamePrefabs[1].tag.Equals("Jump Game"))
+            {
+                jumpGameCameraIndex = 1;
+            }
+            else
+            {
+                jumpGameCameraIndex = 0;
+            }
+        }
+    }
+
+    void MouseGameCheck()
+    {
+        //TODO: Assess a better fix to this
+        if (miniGamePrefabs[0].tag.Equals("Mouse Game") || miniGamePrefabs[1].tag.Equals("Mouse Game"))
+        {
+            mouseGameBombClean = true;
+        }
     }
 }
