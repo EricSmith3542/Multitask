@@ -13,13 +13,16 @@ public class FullGameLogic : MonoBehaviour
     [Header("Games")]
     [SerializeField] private GameObject miniGameHolder;
     [SerializeField] private List<GameObject> miniGamePrefabs;
+    [SerializeField] private AudioSource[] miniGameAudioSources;
 
     [Header("Game Logic Settings")]
     [SerializeField] private float timeBetweenGameAdds = 15f;
-    [SerializeField] private float cameraTransitionSpeed = 1f;
     [SerializeField] private float viewPortSnapFinishRange = .01f;
-    [SerializeField] private float instructionFadeInSeconds = 1f, instructionFadeOutSeconds = 1f;
     [SerializeField] private bool shuffleGames = true;
+    [SerializeField] private float instructionFadeInSeconds = 1f, instructionFadeOutSeconds = 1f;
+    [SerializeField] private float cameraTransitionSpeed = 1f;
+    [SerializeField] private AudioClip transitionSound;
+    [SerializeField] private AudioClip failSound;
 
     [Header("Debugging")]
     [SerializeField] private bool debugNoFail = false;
@@ -60,6 +63,7 @@ public class FullGameLogic : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        Cursor.visible = false;
         GameSetup();
     }
 
@@ -120,6 +124,10 @@ public class FullGameLogic : MonoBehaviour
         yield return new WaitForSeconds(secondsUntilNextGame);
 
         Time.timeScale = 0;
+        SoundManager.Instance.StopAllMusic();
+        SoundManager.Instance.PlaySound(transitionSound);
+        yield return new WaitForSecondsRealtime(transitionSound.length);
+
         //Create new game and add its camera to the list of cameras
         GameObject newGame = Instantiate(miniGamePrefabs[currentGameIndex], new Vector3(0, (currentGameIndex + 1) * yDistanceBetweenGames, 0), Quaternion.identity, miniGameHolder.transform);
 
@@ -127,7 +135,9 @@ public class FullGameLogic : MonoBehaviour
         Camera gameCam = newGame.GetComponentInChildren<Camera>();
         currentGameInstructionFader = newGame.GetComponent<InstructionFade>();
         growingCamera = gameCam;
+
         
+        SoundManager.Instance.PlayMusicWithoutLoop(currentGameIndex);
         TransitionCameras();
     }
 
@@ -205,42 +215,44 @@ public class FullGameLogic : MonoBehaviour
             shrinkingCamera.rect = new Rect(targetX, growHorizontal ? shrinkingCamera.rect.y : finalShrinkingRect.y, finalShrinkingRect.width, finalShrinkingRect.height);
         }
 
-        if (jumpGameCameraShiftNeeded && currentGameIndex >= 1)
+        if (!failed)
         {
-            jumpGameCamera.transform.position = new Vector3(JUMP_CAM_SHIFT, jumpGameCamera.transform.position.y, jumpGameCamera.transform.position.z);
-            jumpGameCameraShiftNeeded = false;
-            jumpGameUnshift = true;
-        }
-        else if (jumpGameUnshift)
-        {
-            jumpGameCamera.transform.position = new Vector3(0f, jumpGameCamera.transform.position.y, jumpGameCamera.transform.position.z);
-            jumpGameUnshift = false;
-        }
-
-        if (mouseGameBombClean && currentGameIndex >= 1)
-        {
-            GameObject mouseGame = GameObject.FindGameObjectWithTag("Mouse Game");
-            Camera mouseGameCamera = mouseGame.GetComponentInChildren<Camera>();
-            Plane[] cameraPlanes = GeometryUtility.CalculateFrustumPlanes(mouseGameCamera);
-
-            foreach (Transform t in mouseGame.transform)
+            if (jumpGameCameraShiftNeeded && currentGameIndex >= 1)
             {
-                if(t.tag.Equals("Bomb Holder"))
+                jumpGameCamera.transform.position = new Vector3(JUMP_CAM_SHIFT, jumpGameCamera.transform.position.y, jumpGameCamera.transform.position.z);
+                jumpGameCameraShiftNeeded = false;
+                jumpGameUnshift = true;
+            }
+            else if (jumpGameUnshift)
+            {
+                jumpGameCamera.transform.position = new Vector3(0f, jumpGameCamera.transform.position.y, jumpGameCamera.transform.position.z);
+                jumpGameUnshift = false;
+            }
+
+            if (mouseGameBombClean && currentGameIndex >= 1)
+            {
+                GameObject mouseGame = GameObject.FindGameObjectWithTag("Mouse Game");
+                Camera mouseGameCamera = mouseGame.GetComponentInChildren<Camera>();
+                Plane[] cameraPlanes = GeometryUtility.CalculateFrustumPlanes(mouseGameCamera);
+
+                foreach (Transform t in mouseGame.transform)
                 {
-                    foreach (Transform bomb in t)
+                    if (t.tag.Equals("Bomb Holder"))
                     {
-                        //Remove any bomb that isnt in the camera any more
-                        if(!GeometryUtility.TestPlanesAABB(cameraPlanes, bomb.GetComponent<Collider>().bounds))
+                        foreach (Transform bomb in t)
                         {
-                            Destroy(bomb.gameObject);
+                            //Remove any bomb that isnt in the camera any more
+                            if (!GeometryUtility.TestPlanesAABB(cameraPlanes, bomb.GetComponent<Collider>().bounds))
+                            {
+                                Destroy(bomb.gameObject);
+                            }
                         }
                     }
                 }
+                mouseGameBombClean = false;
             }
-            mouseGameBombClean = false;
         }
-
-
+        
         //Add the camera to the list of cameras for the next transition
         gameCameras.Add(growingCamera);
 
@@ -255,9 +267,7 @@ public class FullGameLogic : MonoBehaviour
         {
             StartCoroutine(ShowInstructions(instructionFadeInSeconds, instructionFadeOutSeconds));
             yield return new WaitForSecondsRealtime(instructionFadeInSeconds + instructionFadeOutSeconds);
-
-            ////Wait and unfreeze game
-            //yield return new WaitForSecondsRealtime(secondsToWaitAfterTransition);
+            SoundManager.Instance.StartAllMusicUpToIndex(currentGameIndex);
             Time.timeScale = 1;
             currentGameIndex++;
             if (currentGameIndex < miniGamePrefabs.Count)
@@ -265,6 +275,8 @@ public class FullGameLogic : MonoBehaviour
                 StartCoroutine(AddNextGame(timeBetweenGameAdds));
             }
         }
+
+
     }
 
     IEnumerator ShowInstructions(float fadeInSecs, float fadeOutSecs)
@@ -326,6 +338,8 @@ public class FullGameLogic : MonoBehaviour
         if (!debugNoFail)
         {
             StopAllCoroutines();
+            SoundManager.Instance.StopAllMusic();
+            SoundManager.Instance.PlaySound(failSound);
             //StopCoroutine("AddNextGame");
             waitForNoInput = true;
             Time.timeScale = 0;
@@ -345,12 +359,14 @@ public class FullGameLogic : MonoBehaviour
 
     private void GameSetup()
     {
+        SoundManager.Instance.StartMainMenuMusic();
         //TODO: This Shuffle parameter will be used more later when I add more configuration options to how people want to play the game
         if (shuffleGames)
         {
             Utils.Shuffle(miniGamePrefabs);
         }
 
+        InitializeAudioClips();
         //The jump game is the only game where the camera isnt centered on the controllable piece, so when the viewport ratio isn't 1:1, the camera needs to be shifted to keep the jumper on the screen
         JumpGameCheck();
         MouseGameCheck();
@@ -361,6 +377,15 @@ public class FullGameLogic : MonoBehaviour
         totalTimeSurvived = 0;
         jumpGameCamera = null;
         jumpGameUnshift = false;
+    }
+
+    private void InitializeAudioClips()
+    {
+        for (int i = 0; i < miniGamePrefabs.Count; i++)
+        {
+            AudioSource gameAudio = miniGamePrefabs[i].GetComponent<AudioSource>();
+            miniGameAudioSources[i].clip = gameAudio.clip;
+        }
     }
 
     void JumpGameCheck()
