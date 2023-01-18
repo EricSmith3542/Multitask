@@ -78,7 +78,11 @@ public class FullGameLogic : MonoBehaviour
         {
             if (!gameStarted)
             {
-                if (Input.anyKey)
+                if (Input.GetKey(KeyCode.Escape))
+                {
+                    Application.Quit();
+                }
+                else if (Input.anyKey)
                 {
                     gameStarted = true;
                     failed = false;

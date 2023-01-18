@@ -16,10 +16,12 @@ public class BalanceBoard : MiniGame
     [SerializeField]
     private GameObject ball;
 
-    [Range(0.01f, 1)]
+    [Header("Movement Controls")]
     [SerializeField] private float rotationSpeedMultiplier = .5f;
     [SerializeField] private float maxAngularVelocity = 1f;
+    [SerializeField] private float nudgeVelocity = 0.01f;
     private float currentSpeedMultiplier = 0f;
+    private Vector3 velocityDirection;
 
     // Start is called before the first frame update
     new void Start()
@@ -42,16 +44,23 @@ public class BalanceBoard : MiniGame
 
     void FixedUpdate()
     {
-        if(Tilt.ReadValue<float>() == 0)
+        velocityDirection = Rigidbody.velocity.normalized;
+        if (Rigidbody.velocity.magnitude == 0)
         {
-            currentSpeedMultiplier = Mathf.Max(Mathf.Lerp(currentSpeedMultiplier, 0, Time.deltaTime), 0);
-        }
-        else
-        {
-            currentSpeedMultiplier += Mathf.Min(Mathf.Lerp(currentSpeedMultiplier, rotationSpeedMultiplier, Time.deltaTime), rotationSpeedMultiplier);
+            Rigidbody.velocity = velocityDirection * nudgeVelocity;
         }
 
-        Rigidbody.AddTorque(new Vector3(0, 0, Tilt.ReadValue<float>() * currentSpeedMultiplier), ForceMode.VelocityChange);
+        //if(Tilt.ReadValue<float>() == 0)
+        //{
+        //    currentSpeedMultiplier = Mathf.Max(Mathf.Lerp(currentSpeedMultiplier, 0, Time.deltaTime), 0);
+        //}
+        //else
+        //{
+        //    currentSpeedMultiplier += Mathf.Min(Mathf.Lerp(currentSpeedMultiplier, rotationSpeedMultiplier, Time.deltaTime), rotationSpeedMultiplier);
+        //}
+
+
+        Rigidbody.AddTorque(new Vector3(0, 0, Tilt.ReadValue<float>() * rotationSpeedMultiplier), ForceMode.Force);
     }
 
     //This is the result of bad design on my end. I didnt fully think about how I was going to structure the DangerDetection until after the creation of this minigame

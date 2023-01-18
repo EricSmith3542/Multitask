@@ -1341,8 +1341,9 @@ MonoBehaviour:
   lightIntensityMax: 1100
   noDangerDistance: 2
   ball: {fileID: 3545097955955325934}
-  rotationSpeedMultiplier: 0.01
-  maxAngularVelocity: 1
+  rotationSpeedMultiplier: 2
+  maxAngularVelocity: 2
+  nudgeVelocity: 0.01
 --- !u!1 &3545097955955325934
 GameObject:
   m_ObjectHideFlags: 0
@@ -1725,7 +1726,7 @@ Transform:
   - {fileID: 3545097955066183917}
   - {fileID: 5369976176421678398}
   m_Father: {fileID: 0}
-  m_RootOrder: 2
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &-8282158231972574841
 MonoBehaviour:
