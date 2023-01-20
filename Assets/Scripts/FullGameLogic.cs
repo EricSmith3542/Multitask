@@ -403,6 +403,10 @@ public class FullGameLogic : MonoBehaviour
                 jumpGameCameraIndex = 0;
             }
         }
+        else
+        {
+            jumpGameCameraShiftNeeded = false;
+        }
     }
 
     void MouseGameCheck()
@@ -411,6 +415,10 @@ public class FullGameLogic : MonoBehaviour
         if (miniGamePrefabs[0].tag.Equals("Mouse Game") || miniGamePrefabs[1].tag.Equals("Mouse Game"))
         {
             mouseGameBombClean = true;
+        }
+        else
+        {
+            mouseGameBombClean = false;
         }
     }
 }
