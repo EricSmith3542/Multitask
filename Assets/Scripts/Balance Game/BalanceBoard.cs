@@ -9,7 +9,7 @@ public class BalanceBoard : MiniGame
 {
     private const float failDistance = 3f;
     private PlayerInput PlayerInput;
-    private Rigidbody Rigidbody;
+    private Rigidbody Rigidbody, ballRigidBody;
     private InputAction Tilt;
     private bool failed = false;
 
@@ -30,6 +30,8 @@ public class BalanceBoard : MiniGame
         Tilt = GetComponent<PlayerInput>().actions["Tilt"];
         Rigidbody = GetComponent<Rigidbody>();
         Rigidbody.maxAngularVelocity = maxAngularVelocity;
+
+        ballRigidBody = ball.GetComponent<Rigidbody>();
     }
 
     new private void Update()
@@ -44,11 +46,18 @@ public class BalanceBoard : MiniGame
 
     void FixedUpdate()
     {
-        velocityDirection = Rigidbody.velocity.normalized;
-        if (Rigidbody.velocity.magnitude == 0)
+        if (ballRigidBody.velocity.magnitude == 0)
         {
-            Rigidbody.velocity = velocityDirection * nudgeVelocity;
+            if(velocityDirection.magnitude == 0)
+            {
+                ballRigidBody.velocity = Vector3.right * nudgeVelocity;
+            }
+            else
+            {
+                ballRigidBody.velocity = velocityDirection * nudgeVelocity;
+            }
         }
+        velocityDirection = ballRigidBody.velocity.normalized;
 
         //if(Tilt.ReadValue<float>() == 0)
         //{

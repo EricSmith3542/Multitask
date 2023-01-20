@@ -11,6 +11,7 @@ public class FullGameLogic : MonoBehaviour
     [SerializeField] private GameObject RestartScreenUI;
     [SerializeField] private TMP_Text timerText;
     [SerializeField] private Image timerCircle;
+    [SerializeField] private float secondsToDepleteProgressBar = 1.5f;
 
     [Header("Games")]
     [SerializeField] private GameObject miniGameHolder;
@@ -134,6 +135,8 @@ public class FullGameLogic : MonoBehaviour
         SoundManager.Instance.StopAllMusic();
         SoundManager.Instance.PlaySound(transitionSound);
         yield return new WaitForSecondsRealtime(transitionSound.length);
+
+        StartCoroutine(DepleteProgressBar());
 
         //Create new game and add its camera to the list of cameras
         GameObject newGame = Instantiate(miniGamePrefabs[currentGameIndex], new Vector3(0, (currentGameIndex + 1) * yDistanceBetweenGames, 0), Quaternion.identity, miniGameHolder.transform);
@@ -432,6 +435,17 @@ public class FullGameLogic : MonoBehaviour
         else
         {
             mouseGameBombClean = false;
+        }
+    }
+
+    IEnumerator DepleteProgressBar()
+    {
+        float t = 0f;
+        while (timerCircle.fillAmount > 0)
+        {
+            t += Time.unscaledDeltaTime;
+            timerCircle.fillAmount = Mathf.LerpUnclamped(timerCircle.fillAmount, 0f, t/secondsToDepleteProgressBar);
+            yield return new WaitForEndOfFrame();
         }
     }
 }
