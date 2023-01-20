@@ -12,7 +12,7 @@ public class Jumper : MiniGame
 
     private InputAction Jump;
     private Rigidbody rb;
-    private Collider collider;
+    private Collider col;
     private bool failed = false;
 
 
@@ -31,7 +31,7 @@ public class Jumper : MiniGame
         maxJumpHeight = transform.position.y + maxJumpHeight;
         Jump = GetComponent<PlayerInput>().actions["Jump"];
         rb = GetComponent<Rigidbody>();
-        collider = GetComponent<Collider>();
+        col = GetComponent<Collider>();
     }
 
     new void Update()
@@ -81,7 +81,7 @@ public class Jumper : MiniGame
             Bounds obstacleBoundsStretched = new Bounds(realBounds.center, realBounds.size);
             obstacleBoundsStretched.Encapsulate(new Vector3(transform.position.x, closestObstacle.transform.position.y, transform.position.z));
 
-            if (obstacleBoundsStretched.Intersects(collider.bounds))
+            if (obstacleBoundsStretched.Intersects(col.bounds))
             {
                 float newTemp = Utils.MapFloat(Mathf.Min(closestDistance, noDangerDistance), noDangerDistance, 0, lightTempDangerMin, lightTempDangerMax);
                 float newIntensity = Utils.MapFloat(Mathf.Min(closestDistance, noDangerDistance), noDangerDistance, 0, lightIntensityMin, lightIntensityMax);

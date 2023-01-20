@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using UnityEngine.UI;
 
 public class FullGameLogic : MonoBehaviour
 {
@@ -9,6 +10,7 @@ public class FullGameLogic : MonoBehaviour
     [SerializeField] private GameObject StartScreenUI;
     [SerializeField] private GameObject RestartScreenUI;
     [SerializeField] private TMP_Text timerText;
+    [SerializeField] private Image timerCircle;
 
     [Header("Games")]
     [SerializeField] private GameObject miniGameHolder;
@@ -16,7 +18,7 @@ public class FullGameLogic : MonoBehaviour
     [SerializeField] private AudioSource[] miniGameAudioSources;
 
     [Header("Game Logic Settings")]
-    [SerializeField] private float timeBetweenGameAdds = 15f;
+    [SerializeField] private float[] timeBetweenGameAdds;
     [SerializeField] private float viewPortSnapFinishRange = .01f;
     [SerializeField] private bool shuffleGames = true;
     [SerializeField] private float instructionFadeInSeconds = 1f, instructionFadeOutSeconds = 1f;
@@ -28,6 +30,7 @@ public class FullGameLogic : MonoBehaviour
     [SerializeField] private bool debugNoFail = false;
 
     private float totalTimeSurvived = 0f;
+    private float timeInCurrentRound, timeUntilNextGame;
     private bool gameStarted = false;
     private bool waitForNoInput = false;
     
@@ -46,6 +49,7 @@ public class FullGameLogic : MonoBehaviour
     private Rect finalShrinkingRect;
     private bool growHorizontal;
     private bool movingCameras = false;
+    private bool incrementTimer = false;
     private bool failed = false;
     private bool firstGame = true;
 
@@ -110,10 +114,12 @@ public class FullGameLogic : MonoBehaviour
                     gameStarted = false;
                     failed = false;
                 }
-                else
+                else if(incrementTimer)
                 {
                     totalTimeSurvived += Time.deltaTime;
+                    timeInCurrentRound += Time.deltaTime;
                     timerText.text = totalTimeSurvived.ToString("0.0");
+                    timerCircle.fillAmount = timeInCurrentRound / timeUntilNextGame;
                 }
             }
         }
@@ -124,6 +130,7 @@ public class FullGameLogic : MonoBehaviour
         yield return new WaitForSeconds(secondsUntilNextGame);
 
         Time.timeScale = 0;
+        incrementTimer = false;
         SoundManager.Instance.StopAllMusic();
         SoundManager.Instance.PlaySound(transitionSound);
         yield return new WaitForSecondsRealtime(transitionSound.length);
@@ -268,11 +275,17 @@ public class FullGameLogic : MonoBehaviour
             StartCoroutine(ShowInstructions(instructionFadeInSeconds, instructionFadeOutSeconds));
             yield return new WaitForSecondsRealtime(instructionFadeInSeconds + instructionFadeOutSeconds);
             SoundManager.Instance.StartAllMusicUpToIndex(currentGameIndex);
+
+            timeUntilNextGame = currentGameIndex < timeBetweenGameAdds.Length ? timeBetweenGameAdds[currentGameIndex] : timeBetweenGameAdds[timeBetweenGameAdds.Length - 1];
+            timeInCurrentRound = 0;
+
+            incrementTimer = true;
             Time.timeScale = 1;
             currentGameIndex++;
             if (currentGameIndex < miniGamePrefabs.Count)
             {
-                StartCoroutine(AddNextGame(timeBetweenGameAdds));
+                //Add the next game after the timeUntilNextGame elapses. The time is either timeBetweenGameAdds[currentGameIndex] or just the last element in the timeBetweenGameAdds array if curreGameIndex is out of bounds
+                StartCoroutine(AddNextGame(timeUntilNextGame));
             }
         }
 
