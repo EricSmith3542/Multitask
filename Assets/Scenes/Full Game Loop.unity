@@ -2804,7 +2804,7 @@ MonoBehaviour:
   RestartScreenUI: {fileID: 617036027}
   timerText: {fileID: 306079078}
   timerCircle: {fileID: 1479492087}
-  secondsToDepleteProgressBar: 3
+  secondsToDepleteProgressBar: 10
   miniGameHolder: {fileID: 2087642834}
   miniGamePrefabs:
   - {fileID: 3545097956310781877, guid: 472c38ebf7110714aa895cd0fa001c44, type: 3}
@@ -2816,12 +2816,14 @@ MonoBehaviour:
   - {fileID: 297630259}
   - {fileID: 34048273}
   - {fileID: 1470952014}
+  timeScale: 1
+  difficultyIncrement: 0.1
   timeBetweenGameAdds:
   - 10
   - 20
   - 30
   viewPortSnapFinishRange: 0.001
-  shuffleGames: 0
+  shuffleGames: 1
   instructionFadeInSeconds: 2
   instructionFadeOutSeconds: 3.5
   cameraTransitionSpeed: 5

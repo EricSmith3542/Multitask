@@ -35,6 +35,7 @@ public class MouseGame : MonoBehaviour
     [SerializeField] private GameObject collectable;
     [SerializeField] private GameObject bombHolder;
     public float secondsPerSpawn = 2f;
+    private bool firstBomb = true;
 
     // Start is called before the first frame update
     void Start()
@@ -68,6 +69,11 @@ public class MouseGame : MonoBehaviour
         {
             spawnTimer -= Time.deltaTime;
         }
+
+        if(bombHolder.transform.childCount == 0)
+        {
+            firstBomb = true;
+        }
     }
 
     private void OnTriggerEnter(Collider other)
@@ -84,5 +90,10 @@ public class MouseGame : MonoBehaviour
     {
         GameObject ob = Instantiate(collectable, new Vector3(Random.Range(cameraScaledMinX, cameraScaledMaxX), Random.Range(minY, maxY), transform.position.z), Quaternion.identity, bombHolder.transform);
         ob.GetComponent<MouseGameBomb>().attachLight(spotLight, lightTempDangerMin, lightTempDangerMax, lightIntensityMin, lightIntensityMax);
+        if (firstBomb)
+        {
+            ob.GetComponent<MouseGameBomb>().SetAsLightController();
+            firstBomb = false;
+        }
     }
 }

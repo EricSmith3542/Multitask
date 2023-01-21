@@ -858,7 +858,7 @@ Light:
   serializedVersion: 10
   m_Type: 0
   m_Shape: 0
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.9236872, g: 0.5294118, b: 1, a: 1}
   m_Intensity: 400
   m_Range: 31.58
   m_SpotAngle: 179
@@ -1342,7 +1342,7 @@ MonoBehaviour:
   noDangerDistance: 2
   ball: {fileID: 3545097955955325934}
   rotationSpeedMultiplier: 2
-  maxAngularVelocity: 2
+  maxAngularVelocity: 3
   nudgeVelocity: 0.05
 --- !u!1 &3545097955955325934
 GameObject:

@@ -815,7 +815,7 @@ MonoBehaviour:
   lightIntensityMax: 1100
   collectable: {fileID: 5411367646420916652, guid: 9e02c3de1ea9b984cbd4603ae5c07a19, type: 3}
   bombHolder: {fileID: 249105103367684885}
-  secondsPerSpawn: 5
+  secondsPerSpawn: 3
 --- !u!1 &2636032306619659219
 GameObject:
   m_ObjectHideFlags: 0
@@ -860,7 +860,7 @@ Light:
   serializedVersion: 10
   m_Type: 0
   m_Shape: 0
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.5294118, g: 1, b: 0.59637445, a: 1}
   m_Intensity: 400
   m_Range: 31.58
   m_SpotAngle: 179

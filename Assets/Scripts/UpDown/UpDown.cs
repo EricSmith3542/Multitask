@@ -40,7 +40,7 @@ public class UpDown : MiniGame
         initialZ = transform.position.z;
         gameCenter = transform.parent;
         Move = GetComponent<PlayerInput>().actions["UpDown"];
-        StartCoroutine(Spawning());
+        StartCoroutine(Spawning(.5f));
     }
 
     // Update is called once per frame
@@ -60,9 +60,9 @@ public class UpDown : MiniGame
         }
     }
 
-    IEnumerator Spawning()
+    IEnumerator Spawning(float waitSeconds)
     {
-        yield return new WaitForSeconds(secondsBetweenSpawns);
+        yield return new WaitForSeconds(waitSeconds);
 
         float cameraRatio = gameCamera.rect.width / gameCamera.rect.height;
         int randomDirection = (Random.Range(0, 2) * 2 - 1);
@@ -72,7 +72,7 @@ public class UpDown : MiniGame
         ob.setDeleteDistance(((spawnPointPadding * cameraRatio) + 1) * randomDirection);
         ob.setSpeed(obstacleSpeed);
 
-        StartCoroutine(Spawning());
+        StartCoroutine(Spawning(secondsBetweenSpawns));
     }
 
     void MoveCube()

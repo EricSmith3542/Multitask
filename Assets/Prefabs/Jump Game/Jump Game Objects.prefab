@@ -348,7 +348,7 @@ Light:
   serializedVersion: 10
   m_Type: 0
   m_Shape: 0
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 1, g: 0.7989576, b: 0.5294118, a: 1}
   m_Intensity: 400
   m_Range: 31.58
   m_SpotAngle: 179
@@ -1080,7 +1080,7 @@ MonoBehaviour:
   lightIntensityMax: 1100
   noDangerDistance: 10
   controller: {fileID: 3165224745964866053}
-  maxJumpForce: 0.275
+  maxJumpForce: 0.4
   maxJumpHeight: 6.5
 --- !u!114 &3165224745904042727
 MonoBehaviour:

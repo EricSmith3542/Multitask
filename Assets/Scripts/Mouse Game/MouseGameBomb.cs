@@ -15,6 +15,7 @@ public class MouseGameBomb : MonoBehaviour
     private float lightTempDangerMax;
     private float lightIntensityMin;
     private float lightIntensityMax;
+    private bool isLightController = false;
 
 
     private float currentAmount = 0f;
@@ -39,7 +40,7 @@ public class MouseGameBomb : MonoBehaviour
         Vector2 shake = Random.insideUnitCircle * (Time.deltaTime * currentAmount);
         transform.position = new Vector3(anchor.x + shake.x, anchor.y + shake.y, 0);
 
-        if(lightIntensityMin != 0)
+        if(isLightController && lightIntensityMin != 0)
         {
             spotLight.colorTemperature = Utils.MapFloat(timeElapsed, 0, lifeTimeSeconds, lightTempDangerMin, lightTempDangerMax);
             hdSpotLight.intensity = Utils.MapFloat(timeElapsed, 0, lifeTimeSeconds, lightIntensityMin, lightIntensityMax);
@@ -60,5 +61,18 @@ public class MouseGameBomb : MonoBehaviour
         lightTempDangerMin = tempMin;
         lightIntensityMax = intensityMax;
         lightIntensityMin = intensityMin;
+    }
+
+    public void SetAsLightController()
+    {
+        isLightController = true;
+    }
+
+    private void OnDestroy()
+    {
+        if (isLightController && transform.parent.childCount > 1)
+        {
+            transform.parent.GetChild(transform.GetSiblingIndex() + 1).GetComponent<MouseGameBomb>().SetAsLightController();
+        }
     }
 }

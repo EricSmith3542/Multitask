@@ -1197,7 +1197,7 @@ Light:
   serializedVersion: 10
   m_Type: 0
   m_Shape: 0
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.7140107, g: 0.6745283, b: 1, a: 1}
   m_Intensity: 400
   m_Range: 31.58
   m_SpotAngle: 179
@@ -1503,9 +1503,9 @@ MonoBehaviour:
   gameCamera: {fileID: 1503744424234921904}
   obstacle: {fileID: 4927272557024709265, guid: f0205ddac247b554595a02efc578cece, type: 3}
   spawnPointPadding: 10
-  spawnFuzziness: 1
+  spawnFuzziness: 3
   secondsBetweenSpawns: 5
-  obstacleSpeed: 0.75
+  obstacleSpeed: 1.5
 --- !u!114 &1503744425300190129
 MonoBehaviour:
   m_ObjectHideFlags: 0

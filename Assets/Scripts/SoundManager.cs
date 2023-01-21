@@ -88,4 +88,13 @@ public class SoundManager : MonoBehaviour
     {
         return musicSources[index].clip.length;
     }
+
+    public void ChangePitch(float pitch)
+    {
+        effectSource.pitch = pitch;
+        foreach (AudioSource musicSource in musicSources)
+        {
+            musicSource.pitch = pitch;
+        }
+    }
 }

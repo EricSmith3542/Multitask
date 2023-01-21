@@ -19,6 +19,8 @@ public class FullGameLogic : MonoBehaviour
     [SerializeField] private AudioSource[] miniGameAudioSources;
 
     [Header("Game Logic Settings")]
+    [SerializeField] private float timeScale = 1f;
+    [SerializeField] private float difficultyIncrement = .1f;
     [SerializeField] private float[] timeBetweenGameAdds;
     [SerializeField] private float viewPortSnapFinishRange = .01f;
     [SerializeField] private bool shuffleGames = true;
@@ -117,8 +119,8 @@ public class FullGameLogic : MonoBehaviour
                 }
                 else if(incrementTimer)
                 {
-                    totalTimeSurvived += Time.deltaTime;
-                    timeInCurrentRound += Time.deltaTime;
+                    totalTimeSurvived += Time.unscaledDeltaTime;
+                    timeInCurrentRound += Time.unscaledDeltaTime;
                     timerText.text = totalTimeSurvived.ToString("0.0");
                     timerCircle.fillAmount = timeInCurrentRound / timeUntilNextGame;
                 }
@@ -128,7 +130,7 @@ public class FullGameLogic : MonoBehaviour
 
     IEnumerator AddNextGame(float secondsUntilNextGame)
     {
-        yield return new WaitForSeconds(secondsUntilNextGame);
+        yield return new WaitForSecondsRealtime(secondsUntilNextGame);
 
         Time.timeScale = 0;
         incrementTimer = false;
@@ -149,6 +151,20 @@ public class FullGameLogic : MonoBehaviour
         
         SoundManager.Instance.PlayMusicWithoutLoop(currentGameIndex);
         TransitionCameras();
+    }
+
+    IEnumerator IncrementDifficulty(float secondsUntilDifficultyIncrement)
+    {
+        yield return new WaitForSecondsRealtime(secondsUntilDifficultyIncrement);
+        SoundManager.Instance.PlaySound(transitionSound);
+
+        timeInCurrentRound = 0f;
+        timerCircle.fillAmount = 0f;
+
+        Time.timeScale += difficultyIncrement;
+        SoundManager.Instance.ChangePitch(Time.timeScale);
+
+        StartCoroutine(IncrementDifficulty(timeUntilNextGame));
     }
 
     void AdjustViewports()
@@ -283,12 +299,17 @@ public class FullGameLogic : MonoBehaviour
             timeInCurrentRound = 0;
 
             incrementTimer = true;
-            Time.timeScale = 1;
+            Time.timeScale = timeScale;
+            SoundManager.Instance.ChangePitch(Time.timeScale);
             currentGameIndex++;
             if (currentGameIndex < miniGamePrefabs.Count)
             {
                 //Add the next game after the timeUntilNextGame elapses. The time is either timeBetweenGameAdds[currentGameIndex] or just the last element in the timeBetweenGameAdds array if curreGameIndex is out of bounds
                 StartCoroutine(AddNextGame(timeUntilNextGame));
+            }
+            else
+            {
+                StartCoroutine(IncrementDifficulty(timeUntilNextGame));
             }
         }
 
@@ -355,10 +376,12 @@ public class FullGameLogic : MonoBehaviour
         {
             StopAllCoroutines();
             SoundManager.Instance.StopAllMusic();
+            SoundManager.Instance.ChangePitch(1);
             SoundManager.Instance.PlaySound(failSound);
-            //StopCoroutine("AddNextGame");
+            
             waitForNoInput = true;
             Time.timeScale = 0;
+            timerCircle.fillAmount = 0;
             growingCamera = RestartScreenUI.GetComponentInChildren<Camera>();
             growingCamera.rect = new Rect(1f, 0f, 0f, 1f);
             finalGrowingRect = new Rect(0f, 0f, 1f, 1f);
@@ -448,4 +471,5 @@ public class FullGameLogic : MonoBehaviour
             yield return new WaitForEndOfFrame();
         }
     }
+
 }
