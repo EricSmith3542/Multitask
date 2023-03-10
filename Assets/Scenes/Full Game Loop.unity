@@ -2807,8 +2807,8 @@ MonoBehaviour:
   secondsToDepleteProgressBar: 10
   miniGameHolder: {fileID: 2087642834}
   miniGamePrefabs:
-  - {fileID: 3545097956310781877, guid: 472c38ebf7110714aa895cd0fa001c44, type: 3}
   - {fileID: 2636032306154223330, guid: 1faa7ef32aadf25499c476043cafdbb6, type: 3}
+  - {fileID: 3545097956310781877, guid: 472c38ebf7110714aa895cd0fa001c44, type: 3}
   - {fileID: 3165224745895249065, guid: e231efd04d1e3064d9897f4e0ad8b689, type: 3}
   - {fileID: 1503744424833329891, guid: 47c62682d5afaa049aefb2247e9efcd5, type: 3}
   miniGameAudioSources:
@@ -2823,9 +2823,9 @@ MonoBehaviour:
   - 20
   - 30
   viewPortSnapFinishRange: 0.001
-  shuffleGames: 1
-  instructionFadeInSeconds: 2
-  instructionFadeOutSeconds: 3.5
+  shuffleGames: 0
+  instructionFadeInSeconds: 1
+  instructionFadeOutSeconds: 2
   cameraTransitionSpeed: 5
   transitionSound: {fileID: 8300000, guid: e00ac6fad660d67448c0e2631ec48c0e, type: 3}
   failSound: {fileID: 8300000, guid: 41041c82f0167714cab7c5cff623c9bb, type: 3}
